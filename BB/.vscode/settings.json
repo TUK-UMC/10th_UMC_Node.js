@@ -1,0 +1,5 @@
+// 앞으로 VSCode에서 자동으로 import 하는 모듈들은 .js 확장자와 함께 import하도록 설정
+{
+    "javascript.preferences.importModuleSpecifierEnding": "js"
+}
+// nodemon을 사용하여 개발 서버 자동 재실행 - 적을 곳 없어서 여기 적음
