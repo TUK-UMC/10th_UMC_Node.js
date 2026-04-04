@@ -1,6 +1,7 @@
 ### ignore .env ###
 .env
-
+.idea
+node_modules/
 
 ### Node ###
 # Logs
