@@ -1,6 +1,7 @@
 ### ignore .env ###
 .env
-
+.idea
+node_modules/
 
 ### Node ###
 # Logs
@@ -144,4 +145,4 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-/src/generated/prisma
+/balie/ch04/src/generated/prisma
