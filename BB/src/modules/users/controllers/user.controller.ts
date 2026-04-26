@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import { bodyToUser, UserSignUpRequest } from "../dtos/user.dto.js";
-import { userSignUp } from "../services/user.service.js";
+import { userSignUp, challengeMissionService } from "../services/user.service.js";
 
 export const handleUserSignUp = async (req: Request, res: Response, next: NextFunction) => {
     console.log("회원가입을 요청했습니다!");
@@ -13,4 +13,37 @@ export const handleUserSignUp = async (req: Request, res: Response, next: NextFu
 
     //성공 응답 보내기
     res.status(StatusCodes.OK).json({ result: user });
+};
+
+export const challengeMission = async (req: Request, res: Response) => {
+    try {
+        const userId = Number(req.params.userId);
+        const { missionId } = req.body;
+
+        const result = await challengeMissionService(userId, missionId);
+
+        return res.json({
+            success: true,
+            code: "S200",
+            message: "미션 도전 요청 성공",
+            data: [result]
+        });
+
+    } catch (err: any) {
+        if (err.message === "MISSION_ALREADY_ONGOING") {
+            return res.status(400).json({
+                success: false,
+                code: "MISSION_ALREADY_ONGOING",
+                message: "이미 미션을 등록했습니다.",
+                data: null
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            code: "E500",
+            message: `서버 에러: ${err.message}`,
+            data: null
+        });
+    }
 };

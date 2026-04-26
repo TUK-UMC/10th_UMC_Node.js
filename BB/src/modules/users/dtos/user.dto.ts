@@ -5,8 +5,7 @@ export interface UserSignUpRequest {
     gender: string;
     birth: Date;
     address?: string;       // ?가 붙으면 '없을 수도 있음(선택)'이라는 뜻이에요!
-    detailAddress?: string;
-    phoneNumber: string;
+    phone: string;
     preferences: number[];
 }
 
@@ -20,8 +19,7 @@ export const bodyToUser = (body: UserSignUpRequest) => {
         gender: body.gender, // 필수
         birth, // 필수
         address: body.address || "", //선택 
-        detailAddress: body.detailAddress || "", //선택 
-        phoneNumber: body.phoneNumber,//필수
+        phone: body.phone,//필수
         preferences: body.preferences,// 필수 
     };
 };
@@ -35,8 +33,17 @@ export const responseFromUser = (data: { user: any; preferences: any[] }) => {
         gender: data.user.gender,
         birth: data.user.birth,
         address: data.user.address,
-        detailAddress: data.user.detailAddress,
-        phoneNumber: data.user.phoneNumber,
+        phone: data.user.phone,
         preferences: data.preferences,
     };
-}; 
+};
+
+export interface CreateMissionDto {
+    name: string;
+    price: number;
+    point: number;
+}
+
+export interface ChallengeMissionDto {
+    missionId: number;
+}

@@ -19,15 +19,14 @@ export const addUser = async (data: any): Promise<number | null> => {
 
         // 삽입 결과는 ResultSetHeader 타입을 사용합니다.
         const [result] = await pool.query<ResultSetHeader>(
-            `INSERT INTO user (email, name, gender, birth, address, detail_address, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+            `INSERT INTO user (email, name, gender, birth, address, phone) VALUES (?, ?, ?, ?, ?, ?);`,
             [
                 data.email,
                 data.name,
                 data.gender,
                 data.birth,
                 data.address,
-                data.detailAddress,
-                data.phoneNumber,
+                data.phone,
             ]
         );
 
@@ -45,7 +44,7 @@ export const getUser = async (userId: number): Promise<any | null> => {
 
     try {
         const [user] = await pool.query<RowDataPacket[]>(
-            `SELECT * FROM user WHERE id = ?;`,
+            `SELECT * FROM user WHERE user_id = ?;`,
             [userId]
         );
 
@@ -67,7 +66,7 @@ export const setPreference = async (userId: number, foodCategoryId: number): Pro
 
     try {
         await pool.query(
-            `INSERT INTO user_favor_category (food_category_id, user_id) VALUES (?, ?);`,
+            `INSERT INTO userpreference (category_id, user_id) VALUES (?, ?);`,
             [foodCategoryId, userId]
         );
     } catch (err) {
@@ -83,9 +82,9 @@ export const getUserPreferencesByUserId = async (userId: number): Promise<any[]>
 
     try {
         const [preferences] = await pool.query<RowDataPacket[]>(
-            "SELECT ufc.id, ufc.food_category_id, ufc.user_id, fcl.name " +
-            "FROM user_favor_category ufc JOIN food_category fcl on ufc.food_category_id = fcl.id " +
-            "WHERE ufc.user_id = ? ORDER BY ufc.food_category_id ASC;",
+            "SELECT ufc.user_preference_id, ufc.category_id, ufc.user_id, fcl.name " +
+            "FROM userpreference ufc JOIN foodcategory fcl on ufc.category_id = fcl.category_id " +
+            "WHERE ufc.user_id = ? ORDER BY ufc.category_id ASC;",
             [userId]
         );
 
@@ -95,4 +94,34 @@ export const getUserPreferencesByUserId = async (userId: number): Promise<any[]>
     } finally {
         conn.release();
     }
+};
+
+export const findMission = async (missionId: number) => {
+    const [rows]: any = await pool.query(
+        "SELECT * FROM Mission WHERE mission_id = ?",
+        [missionId]
+    );
+    return rows[0];
+};
+
+export const findOngoingMission = async (userId: number, missionId: number) => {
+    const [rows]: any = await pool.query(
+        `SELECT * FROM Complete 
+     WHERE user_id = ? AND mission_id = ? AND is_completed = false`,
+        [userId, missionId]
+    );
+    return rows[0];
+};
+
+export const insertChallenge = async (
+    userId: number,
+    missionId: number,
+    restaurantId: number
+) => {
+    await pool.query(
+        `INSERT INTO Complete 
+     (user_id, mission_id, restaurant_id, is_completed)
+     VALUES (?, ?, ?, false)`,
+        [userId, missionId, restaurantId]
+    );
 };
