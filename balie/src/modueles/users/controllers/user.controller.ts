@@ -1,0 +1,15 @@
+import { Request, Response, NextFunction } from "express";
+import { StatusCodes } from "http-status-codes";
+import {bodyToUser, UserSignUpRequest} from "../dtos/user.dto.js";
+import { userSignUp } from "../servives/user.service.js";
+
+export const handleUserSignUp = async (req: Request, res: Response, next: NextFunction ) => {
+    console.log("회원가입을 요청했습니다!");
+    console.log("body:", req.body); // 값이 잘 들어오나 확인하기 위한 테스트용
+
+    //서비스 로직 호출
+    const user = await userSignUp(bodyToUser(req.body as UserSignUpRequest));
+
+    //성공 응답 보내기
+    res.status(StatusCodes.OK).json({ result: user });
+};
