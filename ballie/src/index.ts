@@ -4,6 +4,8 @@ import cors from "cors";
 import { handleUserSignUp } from "./modueles/users/controllers/user.controller.js";
 import { handleRestaurantAdd } from "./modueles/restarant/controllers/restaurant.controller.js";
 import { handleMissionAdd } from "./modueles/mission/controllers/mission.controller.js";
+import { handleReviewAdd } from "./modueles/review/controllers/review.controller.js";
+import { handleUserMissionAdd } from "./modueles/usermission/controllers/user_mission.controller.js";
 
 // 1. 환경 변수 설정
 dotenv.config();
@@ -25,6 +27,8 @@ app.get("/", (req: Request, res: Response) => {
 app.post("/api/v1/users/signup", handleUserSignUp);
 app.post("/api/v1/restaurants", handleRestaurantAdd);
 app.post("/api/v1/missions/restaurant", handleMissionAdd);
+app.post("/api/v1/reviews", handleReviewAdd);
+app.post("/api/v1/user_missions", handleUserMissionAdd);
 
 // 4. 서버 시작
 app.listen(port, () => {

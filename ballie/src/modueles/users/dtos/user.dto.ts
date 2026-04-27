@@ -1,4 +1,3 @@
-// 1. 회원가입 요청 데이터의 설계도를 만듭니다.
 export interface UserSignUpRequest {
     email: string;
     name: string;
