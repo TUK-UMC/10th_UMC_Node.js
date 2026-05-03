@@ -12,7 +12,7 @@ export const userSignUp = async (data: ReturnType<typeof bodyToUser>) => {
 
     const joinUserId = await addUser({
         email: data.email,
-        username: data.username,
+        name: data.name,
         gender: data.gender,
         birth: new Date(data.birth),
         address: data.address,

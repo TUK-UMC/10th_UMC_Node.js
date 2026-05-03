@@ -12,7 +12,7 @@ export interface MissionCreate {
     type: 'RESTAURANT' | 'REGION';
 }
 
-export interface MissionRestaurantCreate{
+export interface MissionRestaurantCreate {
     restaurantId: number;
 }
 
@@ -46,12 +46,13 @@ export const responseFromMissionRestaurant = ({
     missionRestaurant: any;
 }) => {
     return {
-        missionId: mission.mission_id,
-        restaurantId: mission.restaurant_id,
-        point: mission.point,
-        title: mission.title,
-        content: mission.content,
-        type: mission.type,
-        missionRestaurantId: missionRestaurant.mission_restaurant_id,
+        missionId: Number(mission.missionId),
+        restaurantId: Number(missionRestaurant.restaurantId),
+        point: mission.missionPoint,
+        title: mission.missionTitle,
+        content: mission.missionContent,
+        type: mission.missionType,
+        missionRestaurantId: Number(missionRestaurant.missionRestaurantId),
     };
 };
+

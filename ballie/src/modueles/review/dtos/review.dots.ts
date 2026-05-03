@@ -1,21 +1,51 @@
-export interface ReviewCreateRequest{
-    userId:number;
-    restaurantId:number;
-    review_title:string;
-    review_content:string;
-    score:number;
+export interface ReviewCreateRequest {
+    userId: number;
+    restaurantId: number;
+    reviewTitle: string;
+    reviewContent: string;
+    score: number;
 }
 
-export const responseFromReview =({
-    review,restaurant,user}:{review:any;restaurant:any,user:any})=>{
+export const responseFromReview = ({
+    review, restaurant, user,
+}: {
+    review: any;
+    restaurant: any;
+    user: any;
+}) => {
     return {
-        author_id: user.user_id,
-        author_name : user.username,
-        restaurant_name : restaurant.name,
-        restaurant_address : restaurant.address,
-        review_id : review.id,
-        review_content : review.content,
-        review_title : review.title,
-        score : review.score,
-    }
+        authorId: Number(user.userId),
+        authorName: user.name,
+        restaurantName: restaurant.restaurantName,
+        restaurantAddress: restaurant.restaurantAddress,
+        reviewId: Number(review.reviewId),
+        reviewTitle: review.reviewTitle,
+        reviewContent: review.reviewContent,
+        score: review.score,
+    };
+};
+
+export interface reviewInfoDTO{
+    reviewId : number
+    authorId: number
+    authorName : string
+    restaurantId : number
+    restauantName : string
+    reviewTitle:string
+    reviewContent:string
+    reviewscore:number
+
 }
+
+export const responseFromUserReviews = (reviews: any[]): reviewInfoDTO[] => {
+    return reviews.map((review) => ({
+        reviewId: Number(review.reviewId),
+        authorId: Number(review.userId),
+        authorName: review.user.name,
+        restaurantId: Number(review.restaurantId),
+        restauantName: review.restaurant.restaurantName,
+        reviewTitle: review.reviewTitle,
+        reviewContent: review.reviewContent,
+        reviewscore: review.score,
+    }));
+};
