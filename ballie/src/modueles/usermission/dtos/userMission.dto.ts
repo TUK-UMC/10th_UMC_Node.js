@@ -71,3 +71,17 @@ export const responseFromActiveUserMissions =(aum : any[]): activeUserMissionDTO
     }))
 }
 
+export interface completeUserMissionDTO {
+    userMissionId: number
+    userId: number
+    missionId: number
+    userMissionStatus: UserMissionStatus
+}
+
+export const responseFromCompleteUserMission = (result: any): completeUserMissionDTO => ({
+    userMissionId: Number(result.userMissionId),
+    userId: Number(result.userId),
+    missionId: Number(result.missionId),
+    userMissionStatus: result.userMissionStatus,
+});
+

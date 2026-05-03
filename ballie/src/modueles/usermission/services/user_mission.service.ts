@@ -1,4 +1,4 @@
-import { userMissionStartRequest, responseToUserMission, responseFromUserRestaurantMissions, responseFromActiveUserMissions } from "../dtos/userMission.dto.js";
+import { userMissionStartRequest, responseToUserMission, responseFromUserRestaurantMissions, responseFromActiveUserMissions, responseFromCompleteUserMission } from "../dtos/userMission.dto.js";
 import { addUserMission, getUserMission, getMissionById, getUserById, getRestaurantMissionbyUserId, getActiveUserMissions, getUserMissionById, updateUserMissionStatus } from "../repositories/userMission.repository.js";
 import { UserMissionStatus } from "../../../generated/prisma/enums.js";
 
@@ -37,5 +37,6 @@ export const completeUserMission = async (userMissionId: number) => {
         throw error;
     }
 
-    return await updateUserMissionStatus(userMissionId);
+    const result = await updateUserMissionStatus(userMissionId);
+    return responseFromCompleteUserMission(result);
 };
