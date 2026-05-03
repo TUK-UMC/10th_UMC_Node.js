@@ -9,7 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsx src/index.ts",
-     "dev": "nodemon --ext ts,prisma --exec \"npx prisma generate && tsx src/index.ts\""
+     "dev": "nodemon --ext ts,prisma --ignore src/generated --exec \"npx prisma generate --schema ../prisma/schema.prisma && tsx src/index.ts\""
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

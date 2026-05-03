@@ -28,14 +28,8 @@ export const getActiveUserMission = async (userId : number ) => {
 
 }
 
-export const completeUserMission = async (userMissionId: number, userId: number) => {
+export const completeUserMission = async (userMissionId: number) => {
     const userMission = await getUserMissionById(userMissionId);
-
-    if (Number(userMission!.userId) !== userId) {
-        const error = new Error("해당 미션에 대한 권한이 없습니다.");
-        (error as any).statusCode = 403;
-        throw error;
-    }
 
     if (userMission!.userMissionStatus !== UserMissionStatus.ACTIVE) {
         const error = new Error("ACTIVE 상태의 미션만 완료할 수 있습니다.");
@@ -43,5 +37,5 @@ export const completeUserMission = async (userMissionId: number, userId: number)
         throw error;
     }
 
-    return await updateUserMissionStatus(userMissionId, UserMissionStatus.COMPLETED);
+    return await updateUserMissionStatus(userMissionId);
 };

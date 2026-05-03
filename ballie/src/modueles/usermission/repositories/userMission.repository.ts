@@ -28,10 +28,10 @@ export const getUserMissionById = async (userMisssionId : number) => {
   return await prisma.userMission.findUnique({where : {userMissionId : BigInt(userMisssionId)}})
 }
 
-export const updateUserMissionStatus = async (userMissionId: number, status: UserMissionStatus) => {
+export const updateUserMissionStatus = async (userMissionId: number) => {
   return await prisma.userMission.update({
     where: { userMissionId: BigInt(userMissionId) },
-    data: { userMissionStatus: status },
+    data: { userMissionStatus: UserMissionStatus.COMPLETED },
   });
 };
 export const getRestaurantMissionbyUserId = async (userId:number)=>{

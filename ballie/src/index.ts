@@ -3,7 +3,7 @@ import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import { handleUserSignUp } from "./modueles/users/controllers/user.controller.js";
 import { handleRestaurantAdd } from "./modueles/restarant/controllers/restaurant.controller.js";
-import { handleMissionAdd } from "./modueles/mission/controllers/mission.controller.js";
+import { handleMissionAdd, handleGetRestaurantMissions } from "./modueles/mission/controllers/mission.controller.js";
 import { handleReviewAdd, handleGetUserReviews } from "./modueles/review/controllers/review.controller.js";
 import { handleUserMissionAdd, handleGetUserRestaurantMission, handleGetActiveUserMissions, handleCompleteUserMission } from "./modueles/usermission/controllers/user_mission.controller.js";
 
@@ -27,6 +27,7 @@ app.get("/", (req: Request, res: Response) => {
 app.post("/api/v1/users/signup", handleUserSignUp);
 app.post("/api/v1/restaurants", handleRestaurantAdd);
 app.post("/api/v1/missions/restaurant", handleMissionAdd);
+app.get("/api/v1/restaurants/:restaurantId/missions", handleGetRestaurantMissions);
 app.post("/api/v1/reviews", handleReviewAdd);
 app.get("/api/v1/users/:userId/reviews", handleGetUserReviews);
 app.post("/api/v1/user_missions", handleUserMissionAdd);

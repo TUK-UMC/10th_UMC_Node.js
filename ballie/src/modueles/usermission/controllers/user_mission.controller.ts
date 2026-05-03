@@ -39,15 +39,10 @@ export const handleGetActiveUserMissions = async (req: Request, res: Response, n
 export const handleCompleteUserMission = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userMissionId = Number(req.params.userMissionId);
-        const userId = Number(req.body.userId);
-        const result = await completeUserMission(userMissionId, userId);
+        const result = await completeUserMission(userMissionId);
         res.status(StatusCodes.OK).json({ result });
     } catch (err: any) {
-        if (err.statusCode === 404) {
-            res.status(StatusCodes.NOT_FOUND).json({ error: err.message });
-        } else if (err.statusCode === 403) {
-            res.status(StatusCodes.FORBIDDEN).json({ error: err.message });
-        } else if (err.statusCode === 400) {
+        if (err.statusCode === 400) {
             res.status(StatusCodes.BAD_REQUEST).json({ error: err.message });
         } else {
             next(err);

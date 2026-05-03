@@ -35,3 +35,10 @@ export const getUserbyId = async (userId : number )=>{
   return await prisma.user.findUnique({where:{userId:BigInt(userId)}})
 }
 
+export const getMissionsByRestaurantId = async (restaurantId: number) => {
+  return await prisma.missionRestaurant.findMany({
+    where: { restaurantId: BigInt(restaurantId) },
+    include: { mission: true, restaurant: true },
+  });
+};
+
