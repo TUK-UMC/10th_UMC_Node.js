@@ -87,3 +87,5 @@ export type InquiryImage = Prisma.InquiryImageModel
  * 
  */
 export type Answer = Prisma.AnswerModel
+
+d
