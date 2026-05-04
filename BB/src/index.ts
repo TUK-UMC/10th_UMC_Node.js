@@ -8,7 +8,7 @@ import { createReview, createMission } from "./modules/restaurants/restaurant.co
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // 2. 미들웨어 설정
 app.use(cors());            // cors 방식 허용                 

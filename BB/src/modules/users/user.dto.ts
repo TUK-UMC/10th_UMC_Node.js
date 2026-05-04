@@ -26,16 +26,13 @@ export const bodyToUser = (body: UserSignUpRequest) => {
 
 // responseFromUser : Service에서 받아온 유저 정보 + 선호 카테고리 리스트를 클라이언트에게 보여줄 수 있는 형식으로 변환해주는 DTO 함수
 export const responseFromUser = (data: { user: any; preferences: any[] }) => {
+    const preferCategory = data.preferences.map((p) => p.foodCategory.name);
+
     return {
-        id: data.user.id,
         email: data.user.email,
         name: data.user.name,
-        gender: data.user.gender,
-        birth: data.user.birth,
-        address: data.user.address,
-        phone: data.user.phone,
-        preferences: data.preferences,
-    };
+        preferCategory: preferCategory,
+    }
 };
 
 export interface CreateMissionDto {

@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma" 
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id               BigInt    @id @default(autoincrement()) @map("user_id")
+  name             String?   @db.VarChar(50)
+  gender           String?   @db.VarChar(10)
+  birth            DateTime? @db.Date
+  address          String?   @db.VarChar(255)
+  email            String?   @db.VarChar(100)
+  phone            String?   @db.VarChar(20)
+  isPhoneAdmitted  Boolean?  @map("is_phone_admitted")
+  provider         String?   @db.VarChar(10)
+  point            Int?
+  createdAt        DateTime? @db.DateTime(6) @map("created_at")
+  updatedAt        DateTime? @db.DateTime(6) @map("updated_at")
+  deletedAt        DateTime? @db.DateTime(6) @map("deleted_at")
+  status           String?   @db.VarChar(10)
+  inactiveDate     DateTime? @map("inactive_date")
+
+  preferences      UserPreference[]
+  completes        Complete[]
+  reviews          Review[]
+  reviewImages     ReviewImage[]
+  alarms           Alarm[]
+  alarmSettings    UserAlarmSetting[]
+  inquiries        Inquiry[]
+  inquiryImages    InquiryImage[]
+  answers          Answer[]
+
+  @@map("User")
+}
+
+model FoodCategory {
+  id          BigInt    @id @default(autoincrement()) @map("category_id")
+  name        String?   @db.VarChar(100)
+  createdAt   DateTime? @db.DateTime(6) @map("created_at")
+  updatedAt   DateTime? @db.DateTime(6) @map("updated_at")
+
+  preferences UserPreference[]
+
+  @@map("FoodCategory")
+}
+
+model UserPreference {
+  id          BigInt    @id @default(autoincrement()) @map("user_preference_id")
+  categoryId  BigInt    @map("category_id")
+  userId      BigInt    @map("user_id")
+  createdAt   DateTime? @db.DateTime(6) @map("created_at")
+  updatedAt   DateTime? @db.DateTime(6) @map("updated_at")
+
+  category    FoodCategory @relation(fields: [categoryId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@map("UserPreference")
+}
+
+model Restaurant {
+  id           BigInt    @id @default(autoincrement()) @map("restaurant_id")
+  name         String?   @db.VarChar(50)
+  address      String?   @db.VarChar(255)
+  open         DateTime? @db.Time(0)
+  close        DateTime? @db.Time(0)
+  bossNum      String?   @db.VarChar(100) @map("boss_num")
+
+  images       RestaurantImage[]
+  missions     Mission[]
+  completes    Complete[]
+  reviews      Review[]
+  reviewImages ReviewImage[]
+
+  @@map("Restaurant")
+}
+
+model RestaurantImage {
+  id           BigInt   @id @default(autoincrement()) @map("restaurant_image_id")
+  restaurantId BigInt   @map("restaurant_id")
+  imageUrl     String?  @db.VarChar(255) @map("image_url")
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("RestaurantImage")
+}
+
+model Mission {
+  id           BigInt    @id @default(autoincrement()) @map("mission_id")
+  restaurantId BigInt?   @map("restaurant_id")
+  deadline     DateTime?
+  price        Int?
+  point        Int?
+  createdAt    DateTime? @db.DateTime(6) @map("created_at")
+  updatedAt    DateTime? @db.DateTime(6) @map("updated_at")
+
+  restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
+  completes    Complete[]
+
+  @@map("Mission")
+}
+
+model Complete {
+  id           BigInt    @id @default(autoincrement()) @map("complete_id")
+  userId       BigInt    @map("user_id")
+  missionId    BigInt    @map("mission_id")
+  restaurantId BigInt    @map("restaurant_id")
+  isCompleted  Boolean?  @map("is_completed")
+  completedAt  DateTime? @map("completed_at")
+
+  user         User       @relation(fields: [userId], references: [id])
+  mission      Mission    @relation(fields: [missionId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@map("Complete")
+}
+
+model Review {
+  id           BigInt    @id @default(autoincrement()) @map("review_id")
+  restaurantId BigInt    @map("restaurant_id")
+  userId       BigInt    @map("user_id")
+  content      String?   @db.Text
+  star         Decimal?  @db.Decimal(2, 1)
+  answer       String?   @db.Text
+  createdAt    DateTime? @db.DateTime(6) @map("created_at")
+
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  images       ReviewImage[]
+
+  @@map("Review")
+}
+
+model ReviewImage {
+  id           BigInt   @id @default(autoincrement()) @map("review_image_id")
+  reviewId     BigInt   @map("review_id")
+  restaurantId BigInt   @map("restaurant_id")
+  userId       BigInt   @map("user_id")
+  imageUrl     String?  @db.VarChar(255) @map("image_url")
+
+  review       Review     @relation(fields: [reviewId], references: [id])
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@map("ReviewImage")
+}
+
+model Alarm {
+  id           BigInt     @id @default(autoincrement()) @map("alarm_id")
+  userId       BigInt     @map("user_id")
+  alarmType    AlarmType? @map("alarm_type")
+  title        String?    @db.VarChar(50)
+  content      String?    @db.Text
+  isConfirmed  Boolean?   @map("is_confirmed")
+  createdAt    DateTime?  @db.DateTime(6) @map("created_at")
+  updatedAt    DateTime?  @db.DateTime(6) @map("updated_at")
+  isRead       Boolean?   @map("is_read")
+
+  user         User @relation(fields: [userId], references: [id])
+
+  @@map("Alarm")
+}
+
+model UserAlarmSetting {
+  id           BigInt     @id @default(autoincrement()) @map("user_alarm_setting_id")
+  userId       BigInt     @map("user_id")
+  alarmType    AlarmType? @map("alarm_type")
+  isEnabled    Boolean?   @map("is_enabled")
+
+  user         User @relation(fields: [userId], references: [id])
+
+  @@map("UserAlarmSetting")
+}
+
+model Inquiry {
+  id           BigInt    @id @default(autoincrement()) @map("inquiry_id")
+  userId       BigInt    @map("user_id")
+  title        String?   @db.VarChar(100)
+  content      String?   @db.VarChar(200)
+  createdAt    DateTime? @db.DateTime(6) @map("created_at")
+  isAnswered   Boolean?  @map("is_answered")
+
+  user         User @relation(fields: [userId], references: [id])
+
+  images       InquiryImage[]
+  answers      Answer[]
+
+  @@map("Inquiry")
+}
+
+model InquiryImage {
+  id           BigInt   @id @default(autoincrement()) @map("inquiry_image_id")
+  inquiryId    BigInt   @map("inquiry_id")
+  userId       BigInt   @map("user_id")
+  imageUrl     String?  @db.VarChar(255) @map("image_url")
+
+  inquiry      Inquiry @relation(fields: [inquiryId], references: [id])
+  user         User    @relation(fields: [userId], references: [id])
+
+  @@map("InquiryImage")
+}
+
+model Answer {
+  id           BigInt    @id @default(autoincrement()) @map("answer_id")
+  inquiryId    BigInt    @map("inquiry_id")
+  userId       BigInt    @map("user_id")
+  content      String?   @db.Text
+  createdAt    DateTime? @db.DateTime(6) @map("created_at")
+
+  inquiry      Inquiry @relation(fields: [inquiryId], references: [id])
+  user         User    @relation(fields: [userId], references: [id])
+
+  @@map("Answer")
+}
+
+enum AlarmType {
+  MISSION
+  REVIEW
+}
