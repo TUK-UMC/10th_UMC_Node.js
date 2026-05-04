@@ -1,5 +1,5 @@
-import { UserSignUpRequest } from "../dtos/user.dto.js"; //인터페이스 가져오기 
-import { responseFromUser } from "../dtos/user.dto.js";
+import { UserSignUpRequest } from "./user.dto.js"; //인터페이스 가져오기 
+import { responseFromUser } from "./user.dto.js";
 import {
     addUser,
     getUser,
@@ -8,7 +8,7 @@ import {
     findMission,
     findOngoingMission,
     insertChallenge
-} from "../repositories/user.repository.js";
+} from "./user.repository.js";
 
 export const userSignUp = async (data: UserSignUpRequest) => {
     const joinUserId = await addUser({

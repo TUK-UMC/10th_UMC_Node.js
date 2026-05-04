@@ -1,4 +1,4 @@
-import * as repo from "../repositories/restaurant.repository.js";
+import * as repo from "./restaurant.repository.js";
 
 export const createReviewService = async (
     userId: number,

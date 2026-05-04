@@ -1,5 +1,5 @@
 // repositories/review.repository.ts
-import { pool } from "../../../db.config.js"; // 너 DB 연결
+import { pool } from "../../db.config.js"; // 너 DB 연결
 
 export const findMission = async (missionId: number) => {
     const [rows]: any = await pool.query(

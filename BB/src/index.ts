@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
-import { handleUserSignUp, challengeMission } from "./modules/users/controllers/user.controller.js";
-import { createReview, createMission } from "./modules/restaurants/controllers/restaurant.controller.js";
+import { handleUserSignUp, challengeMission } from "./modules/users/user.controller.js";
+import { createReview, createMission } from "./modules/restaurants/restaurant.controller.js";
 
 // 1. 환경 변수 설정
 dotenv.config();

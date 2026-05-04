@@ -1,5 +1,5 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { pool } from "../../../db.config.js";
+import { pool } from "../../db.config.js";
 
 // 1. User 데이터 삽입
 export const addUser = async (data: any): Promise<number | null> => {

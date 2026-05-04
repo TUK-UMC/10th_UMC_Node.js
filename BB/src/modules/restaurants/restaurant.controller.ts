@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createReviewService, createMissionService } from "../services/restaurant.service.js";
+import { createReviewService, createMissionService } from "./restaurant.service.js";
 
 export const createReview = async (req: Request, res: Response) => {
     try {

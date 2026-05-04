@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
-import { bodyToUser, UserSignUpRequest } from "../dtos/user.dto.js";
-import { userSignUp, challengeMissionService } from "../services/user.service.js";
+import { bodyToUser, UserSignUpRequest } from "./user.dto.js";
+import { userSignUp, challengeMissionService } from "./user.service.js";
 
 export const handleUserSignUp = async (req: Request, res: Response, next: NextFunction) => {
     console.log("회원가입을 요청했습니다!");
