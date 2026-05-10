@@ -6,15 +6,24 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "dev": "nodemon --exec node src/index.js"
+    "start": "tsoa spec-and-routes && npx tsx src/index.ts",
+    "dev": "tsoa spec-and-routes && nodemon --exec \"npx tsx\" src/index.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.0.1"
+    "cookie-parser": "^1.4.7",
+    "express": "^5.0.1",
+    "morgan": "^1.10.1",
+    "reflect-metadata": "^0.2.2",
+    "tsoa": "^7.0.0-alpha.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
     "nodemon": "^3.1.4"
   }
 }

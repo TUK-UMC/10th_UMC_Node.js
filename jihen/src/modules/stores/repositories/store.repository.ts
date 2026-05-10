@@ -1,5 +1,41 @@
-import { prisma } from "../../../db.config.js";
-import { type AddStoreRequest, type AddReviewRequest, type AddMissionRequest } from "../dtos/store.dto.js";
+import { prisma } from "../../../db.config";
+import { type AddStoreRequest, type AddReviewRequest, type AddMissionRequest } from "../dtos/store.dto";
+
+interface Store {
+  storeId: bigint;
+  regionId: bigint;
+  name: string;
+  address: string;
+  category: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Mission {
+  missionId: bigint;
+  storeId: bigint;
+  title: string;
+  description: string | null;
+  rewardPoint: number;
+  startAt: Date | null;
+  endAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface MemberMission {
+  membermissionId: bigint;
+  memberId: bigint;
+  missionId: bigint;
+  status: number;
+  completedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface OngoingMission extends MemberMission {
+  mission: Mission & { store: Store };
+}
 
 export const addStore = async (data: AddStoreRequest): Promise<number> => {
   const store = await prisma.store.create({
@@ -13,8 +49,15 @@ export const addStore = async (data: AddStoreRequest): Promise<number> => {
   return Number(store.storeId);
 };
 
-export const getStoreById = async (storeId: number): Promise<any | null> => {
-  return await prisma.store.findFirst({ where: { storeId: BigInt(storeId) } });
+export const getStoreById = async (storeId: number): Promise<{ storeId: bigint } | null> => {
+  return await prisma.store.findFirst({
+    where: { storeId: BigInt(storeId) },
+    select: { storeId: true },
+  });
+};
+
+export const getStoreByNameAndAddress = async (name: string, address: string): Promise<Store | null> => {
+  return await prisma.store.findFirst({ where: { name, address } });
 };
 
 export const addReview = async (storeId: number, data: AddReviewRequest): Promise<number> => {
@@ -43,13 +86,17 @@ export const addMission = async (storeId: number, data: AddMissionRequest): Prom
   return Number(mission.missionId);
 };
 
-export const getMissionById = async (missionId: number): Promise<any | null> => {
-  return await prisma.mission.findFirst({ where: { missionId: BigInt(missionId) } });
+export const getMissionById = async (missionId: number): Promise<{ missionId: bigint } | null> => {
+  return await prisma.mission.findFirst({
+    where: { missionId: BigInt(missionId) },
+    select: { missionId: true },
+  });
 };
 
-export const getChallengingMission = async (memberId: number, missionId: number): Promise<any | null> => {
+export const getChallengingMission = async (memberId: number, missionId: number): Promise<{ membermissionId: bigint } | null> => {
   return await prisma.memberMission.findFirst({
     where: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: 0 },
+    select: { membermissionId: true },
   });
 };
 
@@ -60,7 +107,6 @@ export const challengeMission = async (memberId: number, missionId: number): Pro
   return Number(result.membermissionId);
 };
 
-// 가게 리뷰 목록 (커서 페이지네이션)
 export const getAllStoreReviews = async (storeId: number, cursor: number) => {
   return await prisma.userStoreReview.findMany({
     select: {
@@ -78,16 +124,25 @@ export const getAllStoreReviews = async (storeId: number, cursor: number) => {
   });
 };
 
-// ③ 특정 가게의 미션 목록
-export const getMissionsByStoreId = async (storeId: number): Promise<any[]> => {
+export const getMissionsByStoreId = async (storeId: number): Promise<Mission[]> => {
   return await prisma.mission.findMany({
     where: { storeId: BigInt(storeId) },
+    select: {
+      missionId: true,
+      storeId: true,
+      title: true,
+      description: true,
+      rewardPoint: true,
+      startAt: true,
+      endAt: true,
+      createdAt: true,
+      updatedAt: true,
+    },
     orderBy: { createdAt: "desc" },
-  });
+  }) as Mission[];
 };
 
-// ④ 내가 진행 중인 미션 목록
-export const getOngoingMissionsByMemberId = async (memberId: number): Promise<any[]> => {
+export const getOngoingMissionsByMemberId = async (memberId: number): Promise<OngoingMission[]> => {
   return await prisma.memberMission.findMany({
     where: { memberId: BigInt(memberId), status: 0 },
     include: {
@@ -96,13 +151,12 @@ export const getOngoingMissionsByMemberId = async (memberId: number): Promise<an
       },
     },
     orderBy: { createdAt: "desc" },
-  });
+  }) as OngoingMission[];
 };
 
-// ⑤ 진행 중인 미션 완료 처리
-export const completeMemberMission = async (memberMissionId: number): Promise<any> => {
+export const completeMemberMission = async (memberMissionId: number): Promise<MemberMission> => {
   return await prisma.memberMission.update({
     where: { membermissionId: BigInt(memberMissionId) },
     data: { status: 1, completedAt: new Date() },
-  });
+  }) as MemberMission;
 };
