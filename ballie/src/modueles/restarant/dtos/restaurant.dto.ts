@@ -1,30 +1,32 @@
-export interface RestaurantCreateRequest{
+export interface RestaurantCreateRequest {
     restaurantName: string;
     restaurantAddress: string;
-    regionId:number;
-    foodCategoryId:number;
+    regionId: number;
+    foodCategoryId: number;
 }
 
 export const responseFromRestaurant = ({
-    restaurant,region,foodCategory,}: {
+    restaurant, region, foodCategory,
+}: {
     restaurant: any;
     region: any;
     foodCategory: any;
 }) => {
     return {
-        restaurantId: restaurant.restaurant_id,
-        restaurantName: restaurant.restaurant_name,
-        restaurantAddress: restaurant.restaurant_address,
-        regionName: region.region_name,
-        foodCategoryName: foodCategory.name,
+        restaurantId: Number(restaurant.restaurantId),
+        restaurantName: restaurant.restaurantName,
+        restaurantAddress: restaurant.restaurantAddress,
+        regionName: region.regionName,
+        foodCategoryName: foodCategory.categoryName,
     };
 };
 
-export const bodyToRestaurant = (body:RestaurantCreateRequest) => {
+export const bodyToRestaurant = (body: RestaurantCreateRequest) => {
     return {
         restaurantName: body.restaurantName,
         restaurantAddress: body.restaurantAddress,
         regionId: body.regionId,
         foodCategoryId: body.foodCategoryId,
-    }
-}
+    };
+};
+

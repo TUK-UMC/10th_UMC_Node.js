@@ -1,3 +1,4 @@
+-- Active: 1765701620672@@127.0.0.1@3306
 ### ignore .env ###
 ballie/.env
 .env
@@ -148,4 +149,4 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-/ballie/ch04/src/generated/prisma
+/ballie/ch04/src/generated/prismaballie/src/generated/

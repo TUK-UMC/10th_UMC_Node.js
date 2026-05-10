@@ -12,7 +12,7 @@ export interface MissionCreate {
     type: 'RESTAURANT' | 'REGION';
 }
 
-export interface MissionRestaurantCreate{
+export interface MissionRestaurantCreate {
     restaurantId: number;
 }
 
@@ -38,6 +38,28 @@ export const bodyToMission = (body: MissionRestaurantCreateRequest) => {
     };
 };
 
+export interface restaurantMissionDTO {
+    missionId: number;
+    missionTitle: string;
+    missionContent: string;
+    missionPoint: number;
+    missionType: string;
+    restaurantId: number;
+    restaurantName: string;
+}
+
+export const responseFromRestaurantMissions = (missions: any[]): restaurantMissionDTO[] => {
+    return missions.map((m) => ({
+        missionId: Number(m.mission.missionId),
+        missionTitle: m.mission.missionTitle,
+        missionContent: m.mission.missionContent,
+        missionPoint: m.mission.missionPoint,
+        missionType: m.mission.missionType,
+        restaurantId: Number(m.restaurant.restaurantId),
+        restaurantName: m.restaurant.restaurantName,
+    }));
+};
+
 export const responseFromMissionRestaurant = ({
     mission,
     missionRestaurant,
@@ -46,12 +68,13 @@ export const responseFromMissionRestaurant = ({
     missionRestaurant: any;
 }) => {
     return {
-        missionId: mission.mission_id,
-        restaurantId: mission.restaurant_id,
-        point: mission.point,
-        title: mission.title,
-        content: mission.content,
-        type: mission.type,
-        missionRestaurantId: missionRestaurant.mission_restaurant_id,
+        missionId: Number(mission.missionId),
+        restaurantId: Number(missionRestaurant.restaurantId),
+        point: mission.missionPoint,
+        title: mission.missionTitle,
+        content: mission.missionContent,
+        type: mission.missionType,
+        missionRestaurantId: Number(missionRestaurant.missionRestaurantId),
     };
 };
+

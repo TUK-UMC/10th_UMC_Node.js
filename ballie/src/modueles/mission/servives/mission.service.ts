@@ -1,12 +1,14 @@
 import {
     bodyToMission,
     responseFromMissionRestaurant,
+    responseFromRestaurantMissions,
 } from "../dtos/mission.dto.js";
 import {
     addMission,
     addMissionRestaurant,
     getMission,
     getMissionRestaurant,
+    getMissionsByRestaurantId,
 } from "../repositories/mission.repository.js";
 
 export const restaurantMissionAdd = async (data: ReturnType<typeof bodyToMission>) => {
@@ -23,4 +25,9 @@ export const restaurantMissionAdd = async (data: ReturnType<typeof bodyToMission
     const missionRestaurant = await getMissionRestaurant(joinMissionId);
 
     return responseFromMissionRestaurant({ mission, missionRestaurant });
+};
+
+export const getRestaurantMissions = async (restaurantId: number) => {
+    const missions = await getMissionsByRestaurantId(restaurantId);
+    return responseFromRestaurantMissions(missions);
 };

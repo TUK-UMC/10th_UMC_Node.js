@@ -1,5 +1,5 @@
-import { ReviewCreateRequest, responseFromReview } from "../dtos/review.dots.js";
-import { addReview, getReview, getUserById, getRestaurantById } from "../repositories/review.repository.js";
+import { ReviewCreateRequest, responseFromReview, responseFromUserReviews } from "../dtos/review.dots.js";
+import { addReview, getReview, getUserById, getRestaurantById, getReviewsByUserId } from "../repositories/review.repository.js";
 
 export const reviewAdd = async (data: ReviewCreateRequest) => {
     const restaurant = await getRestaurantById(data.restaurantId);
@@ -14,4 +14,9 @@ export const reviewAdd = async (data: ReviewCreateRequest) => {
     const user = await getUserById(data.userId);
 
     return responseFromReview({ review, restaurant, user });
+};
+
+export const getUserReviews = async (userId: number) => {
+    const reviews = await getReviewsByUserId(userId);
+    return responseFromUserReviews(reviews);
 };
