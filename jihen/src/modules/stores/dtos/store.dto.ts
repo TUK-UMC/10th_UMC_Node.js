@@ -22,6 +22,7 @@ export interface AddMissionRequest {
 export interface ChallengeMissionRequest {
   memberId: number;
 }
+<<<<<<< feat/issue-30
 
 export const responseFromReviews = (reviews: any[]) => {
   const lastReview = reviews[reviews.length - 1];
@@ -32,3 +33,5 @@ export const responseFromReviews = (reviews: any[]) => {
     },
   };
 };
+=======
+>>>>>>> develop
