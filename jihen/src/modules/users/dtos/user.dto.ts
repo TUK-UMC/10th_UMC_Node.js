@@ -30,6 +30,10 @@ export const responseFromUser = ({ user, preferences }: { user: any; preferences
   return {
     email: user.email,
     name: user.name,
+<<<<<<< feat/issue-30
+    preferCategory: preferences.map((p) => p.foodCategory?.name),
+=======
     preferCategory: preferences.map((p) => p.name),
+>>>>>>> develop
   };
 };

@@ -1,3 +1,21 @@
+<<<<<<< feat/issue-30
+import "dotenv/config";
+import { PrismaClient } from "./generated/prisma/client.js";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+
+const adapter = new PrismaMariaDb({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
+  connectionLimit: 10,
+});
+
+export const prisma = new PrismaClient({
+  adapter,
+  log: ["query", "info", "error", "warn"],
+=======
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 
@@ -15,4 +33,5 @@ export const pool = mysql.createPool({
   // true면 요청을 queue에 넣고 connection을 사용할 수 있게 되면 요청을 실행하며, false이면 즉시 오류를 내보내고 다시 요청
   connectionLimit: 10, // 몇 개의 커넥션을 가지게끔 할 것인지
   queueLimit: 0, // getConnection에서 오류가 발생하기 전에 Pool에 대기할 요청의 개수 한도
+>>>>>>> develop
 });

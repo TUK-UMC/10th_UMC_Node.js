@@ -22,3 +22,16 @@ export interface AddMissionRequest {
 export interface ChallengeMissionRequest {
   memberId: number;
 }
+<<<<<<< feat/issue-30
+
+export const responseFromReviews = (reviews: any[]) => {
+  const lastReview = reviews[reviews.length - 1];
+  return {
+    data: reviews,
+    pagination: {
+      cursor: lastReview ? lastReview.id : null,
+    },
+  };
+};
+=======
+>>>>>>> develop
