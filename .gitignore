@@ -3,7 +3,8 @@
 ballie/.env
 .idea
 node_modules/
-
+ballie/src/generated/prisma
+ballie/prisma
 ### Node ###
 # Logs
 logs
