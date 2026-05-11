@@ -147,4 +147,5 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-/ballie/ch04/src/generated/prismaballie/src/generated/
+ballie/ch04/src/generated/prisma
+ballie/src/generated/
