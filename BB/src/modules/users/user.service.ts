@@ -1,5 +1,4 @@
-import { UserSignUpRequest } from "./user.dto.js"; //인터페이스 가져오기 
-import { responseFromUser } from "./user.dto.js";
+import { UserSignUpRequest, responseFromUser, responseFromReviews, responseFromMissions, MissionListResponse, ReviewListResponse } from "./user.dto.js"; //인터페이스 가져오기 
 import {
     addUser,
     getUser,
@@ -7,7 +6,9 @@ import {
     setPreference,
     findMission,
     findOngoingMission,
-    insertChallenge
+    insertChallenge,
+    getAllUserReviews,
+    getAllUserMissions
 } from "./user.repository.js";
 
 export const userSignUp = async (data: UserSignUpRequest) => {
@@ -25,7 +26,7 @@ export const userSignUp = async (data: UserSignUpRequest) => {
     }
 
     for (const preference of data.preferences) {
-        await setPreference(joinUserId, preference);
+        await setPreference(joinUserId, BigInt(preference));
     }
 
     const user = await getUser(joinUserId);
@@ -35,8 +36,8 @@ export const userSignUp = async (data: UserSignUpRequest) => {
 };
 
 export const challengeMissionService = async (
-    userId: number,
-    missionId: number
+    userId: bigint,
+    missionId: bigint
 ) => {
     // 1. 유저 확인
     const user = await getUser(userId);
@@ -45,6 +46,7 @@ export const challengeMissionService = async (
     // 2. 미션 확인
     const mission = await findMission(missionId);
     if (!mission) throw new Error("MISSION_NOT_EXIST");
+    if (!mission.restaurantId) throw new Error("MISSION_RESTAURANT_NOT_EXIST");
 
     // 3. 중복 체크
     const exist = await findOngoingMission(userId, missionId);
@@ -54,11 +56,27 @@ export const challengeMissionService = async (
     await insertChallenge(
         userId,
         missionId,
-        mission.restaurant_id
+        mission.restaurantId
     );
 
     return {
         missionId,
         status: "ONGOING"
     };
+};
+
+export const listUserReviewsService = async (
+    userId: bigint,
+    cursor: number
+): Promise<ReviewListResponse> => {
+    const reviews = await getAllUserReviews(userId, cursor);
+    return responseFromReviews(reviews, cursor);
+};
+
+export const listUserMissionsService = async (
+    userId: bigint,
+    cursor: number
+): Promise<MissionListResponse> => {
+    const missions = await getAllUserMissions(userId, cursor);
+    return responseFromMissions(missions, cursor);
 };

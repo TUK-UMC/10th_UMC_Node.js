@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { StatusCodes } from "http-status-codes";
 import { bodyToUser, UserSignUpRequest } from "./user.dto.js";
-import { userSignUp, challengeMissionService } from "./user.service.js";
+import { userSignUp, challengeMissionService, listUserReviewsService, listUserMissionsService } from "./user.service.js";
+import { parseBigInt } from "../../utils/parse.js";
 
 export const handleUserSignUp = async (req: Request, res: Response, next: NextFunction) => {
     console.log("회원가입을 요청했습니다!");
@@ -17,8 +18,8 @@ export const handleUserSignUp = async (req: Request, res: Response, next: NextFu
 
 export const challengeMission = async (req: Request, res: Response) => {
     try {
-        const userId = Number(req.params.userId);
-        const { missionId } = req.body;
+        const userId = parseBigInt(req.params.userId);
+        const missionId = BigInt(req.body.missionId);
 
         const result = await challengeMissionService(userId, missionId);
 
@@ -26,7 +27,10 @@ export const challengeMission = async (req: Request, res: Response) => {
             success: true,
             code: "S200",
             message: "미션 도전 요청 성공",
-            data: [result]
+            data: [{
+                ...result,
+                missionId: result.missionId.toString(),
+            }]
         });
 
     } catch (err: any) {
@@ -45,5 +49,45 @@ export const challengeMission = async (req: Request, res: Response) => {
             message: `서버 에러: ${err.message}`,
             data: null
         });
+    }
+};
+
+export const listUserMissions = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const userId = parseBigInt(req.params.userId);
+        const cursor =
+            typeof req.query.cursor === "string"
+                ? parseInt(req.query.cursor, 10)
+                : 0;
+
+        const missions = await listUserMissionsService(userId, cursor);
+
+        res.status(StatusCodes.OK).json(missions);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const listUserReviews = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const userId = parseBigInt(req.params.userId);
+        const cursor =
+            typeof req.query.cursor === "string"
+                ? parseInt(req.query.cursor, 10)
+                : 0;
+
+        const reviews = await listUserReviewsService(userId, cursor);
+
+        res.status(StatusCodes.OK).json(reviews);
+    } catch (err) {
+        next(err);
     }
 };

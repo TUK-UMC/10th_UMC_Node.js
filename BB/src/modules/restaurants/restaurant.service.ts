@@ -1,8 +1,10 @@
 import * as repo from "./restaurant.repository.js";
+import { responseFromReviews, ReviewListResponse, MissionListResponse, responseFromMissions } from "./restaurant.dto.js";
+
 
 export const createReviewService = async (
-    userId: number,
-    restaurantId: number,
+    userId: bigint,
+    restaurantId: bigint,
     content: string,
     star: number
 ) => {
@@ -13,14 +15,14 @@ export const createReviewService = async (
         star
     });
 
-    if (Number.isNaN(userId) || userId <= 0) {
+    if (userId <= 0n) {
         console.error("[createReviewService] userId is invalid", {
             userId
         });
         throw new Error("INVALID_USER_ID");
     }
 
-    if (Number.isNaN(restaurantId)) {
+    if (restaurantId <= 0n) {
         console.error("[createReviewService] restaurantId is invalid", {
             restaurantId
         });
@@ -53,10 +55,10 @@ export const createReviewService = async (
 };
 
 export const createMissionService = async (
-    restaurantId: number,
+    restaurantId: bigint,
     name: string,
-    price: number,
-    point: number
+    price: number | null,
+    point: number | null
 ) => {
     // 1. 식당 존재 확인
     const restaurant = await repo.findRestaurant(restaurantId);
@@ -67,4 +69,20 @@ export const createMissionService = async (
 
     // 2. 미션 생성
     return await repo.createMission(restaurantId, name, price, point);
+};
+
+export const listRestaurantReviewsService = async (
+    restaurantId: bigint,
+    cursor: number
+): Promise<ReviewListResponse> => {
+    const reviews = await repo.getAllRestaurantReviews(restaurantId, cursor);
+    return responseFromReviews(reviews, cursor);
+};
+
+export const listRestaurantMissionsService = async (
+    restaurantId: bigint,
+    cursor: number
+): Promise<MissionListResponse> => {
+    const missions = await repo.getAllRestaurantMissions(restaurantId, cursor);
+    return responseFromMissions(missions, cursor);
 };
