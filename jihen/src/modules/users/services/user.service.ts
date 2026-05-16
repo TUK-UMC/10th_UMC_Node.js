@@ -1,35 +1,42 @@
 import { type UserSignUpRequest, type UserSignUpResponse } from "../dtos/user.dto";
 import { addUser, getUser, getUserPreferencesByUserId, setPreferences } from "../repositories/user.repository";
 import { DuplicateUserEmailError } from "../../../common/errors/error";
+import { Gender } from "../../../generated/prisma/enums";
 import bcrypt from "bcrypt";
+
+const resolveGender = (g: string): Gender => {
+  if (g === "남성") return Gender.MALE;
+  if (g === "여성") return Gender.FEMALE;
+  return Gender.OTHER;
+};
 
 export const signUpUser = async (data: UserSignUpRequest): Promise<UserSignUpResponse> => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
 
-  const userId = await addUser({
+  const memberId = await addUser({
     email: data.email,
     password: hashedPassword,
     name: data.name,
-    gender: data.gender,
+    gender: resolveGender(data.gender),
     birth: new Date(data.birth),
-    address: data.address ?? "",
+    address: data.address,
     detailAddress: data.detailAddress,
-    phoneNumber: data.phoneNumber,
+    phoneNum: data.phoneNumber,
   });
 
-  if (userId === null) {
+  if (memberId === null) {
     throw new DuplicateUserEmailError("이미 존재하는 이메일입니다.", data);
   }
 
   if (data.preferences.length > 0) {
-    await setPreferences(userId, data.preferences);
+    await setPreferences(memberId, data.preferences);
   }
 
-  const user = await getUser(userId);
-  const preferences = await getUserPreferencesByUserId(userId);
+  const member = await getUser(memberId);
+  const preferences = await getUserPreferencesByUserId(memberId);
 
   return {
-    userId: user.id,
+    userId: Number(member.memberId),
     preferences: preferences.map((p) => p.foodCategory?.name ?? ""),
   };
 };

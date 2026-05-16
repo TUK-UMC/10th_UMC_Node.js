@@ -15,7 +15,6 @@ import {
   getMissionById,
   getChallengingMission,
   challengeMission,
-<<<<<<< feat/issue-30
   getMissionsByStoreId,
   getOngoingMissionsByMemberId,
   completeMemberMission,
@@ -59,7 +58,6 @@ export const startMissionChallenge = async (missionId: number, data: ChallengeMi
   const challengeId = await challengeMission(data.memberId, missionId);
   return { challengeId };
 };
-<<<<<<< feat/issue-30
 
 export const getStoreMissions = async (storeId: number): Promise<MissionItem[]> => {
   const store = await getStoreById(storeId);
@@ -108,5 +106,3 @@ export const listStoreReviews = async (storeId: number, cursor: number): Promise
     pagination: { cursor: lastReview ? lastReview.id : null },
   };
 };
-=======
->>>>>>> develop
