@@ -1,72 +1,54 @@
-import { type Request, type Response, type NextFunction } from "express";
-import { StatusCodes } from "http-status-codes";
-import { type AddStoreRequest, type AddReviewRequest, type AddMissionRequest, type ChallengeMissionRequest } from "../dtos/store.dto.js";
-import { createStore, createReview, createMission, startMissionChallenge, getStoreMissions, getMyOngoingMissions, finishMission, listStoreReviews } from "../services/store.service.js";
+import { Body, Controller, Get, Path, Post, Query, Route, Tags } from "tsoa";
+import {
+  type AddStoreRequest, type AddStoreResponse,
+  type AddReviewRequest, type AddReviewResponse,
+  type AddMissionRequest, type AddMissionResponse,
+  type MissionItem, type ReviewsResponse,
+} from "../dtos/store.dto";
+import {
+  createStore, createReview, createMission,
+  getStoreMissions, listStoreReviews,
+} from "../services/store.service";
+import { type ApiResponse, success } from "../../../common/responses/response";
 
-export const handleAddStore = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const result = await createStore(req.body as AddStoreRequest);
-    res.status(StatusCodes.CREATED).json({ result });
-  } catch (err) { next(err); }
-};
+@Route("stores")
+@Tags("Stores")
+export class StoreController extends Controller {
+  @Post("")
+  public async handleAddStore(
+    @Body() body: AddStoreRequest,
+  ): Promise<ApiResponse<AddStoreResponse>> {
+    return success(await createStore(body));
+  }
 
-export const handleAddReview = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const storeId = Number(req.params["storeId"]);
-    const result = await createReview(storeId, req.body as AddReviewRequest);
-    res.status(StatusCodes.CREATED).json({ result });
-  } catch (err) { next(err); }
-};
+  @Post("{storeId}/reviews")
+  public async handleAddReview(
+    @Path() storeId: number,
+    @Body() body: AddReviewRequest,
+  ): Promise<ApiResponse<AddReviewResponse>> {
+    return success(await createReview(storeId, body));
+  }
 
-export const handleAddMission = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const storeId = Number(req.params["storeId"]);
-    const result = await createMission(storeId, req.body as AddMissionRequest);
-    res.status(StatusCodes.CREATED).json({ result });
-  } catch (err) { next(err); }
-};
+  @Post("{storeId}/missions")
+  public async handleAddMission(
+    @Path() storeId: number,
+    @Body() body: AddMissionRequest,
+  ): Promise<ApiResponse<AddMissionResponse>> {
+    return success(await createMission(storeId, body));
+  }
 
-export const handleChallengeMission = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const missionId = Number(req.params["missionId"]);
-    const result = await startMissionChallenge(missionId, req.body as ChallengeMissionRequest);
-    res.status(StatusCodes.CREATED).json({ result });
-  } catch (err) { next(err); }
-};
+  @Get("{storeId}/reviews")
+  public async handleListStoreReviews(
+    @Path() storeId: number,
+    @Query() cursor?: number,
+  ): Promise<ApiResponse<ReviewsResponse>> {
+    return success(await listStoreReviews(storeId, cursor ?? 0));
+  }
 
-// ③ 특정 가게의 미션 목록
-export const handleGetStoreMissions = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const storeId = Number(req.params["storeId"]);
-    const result = await getStoreMissions(storeId);
-    res.status(StatusCodes.OK).json({ result });
-  } catch (err) { next(err); }
-};
-
-// ④ 내가 진행 중인 미션 목록
-export const handleGetMyMissions = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const memberId = Number(req.params["memberId"]);
-    const result = await getMyOngoingMissions(memberId);
-    res.status(StatusCodes.OK).json({ result });
-  } catch (err) { next(err); }
-};
-
-// ⑤ 미션 완료 처리
-export const handleCompleteMission = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const memberMissionId = Number(req.params["memberMissionId"]);
-    const result = await finishMission(memberMissionId);
-    res.status(StatusCodes.OK).json({ result });
-  } catch (err) { next(err); }
-};
-
-// 가게 리뷰 목록 (커서 페이지네이션)
-export const handleListStoreReviews = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const storeId = parseInt(req.params["storeId"] as string, 10);
-    const cursor = typeof req.query.cursor === "string" ? parseInt(req.query.cursor, 10) : 0;
-    const result = await listStoreReviews(storeId, cursor);
-    res.status(StatusCodes.OK).json(result);
-  } catch (err) { next(err); }
-};
+  @Get("{storeId}/missions")
+  public async handleGetStoreMissions(
+    @Path() storeId: number,
+  ): Promise<ApiResponse<MissionItem[]>> {
+    return success(await getStoreMissions(storeId));
+  }
+}
