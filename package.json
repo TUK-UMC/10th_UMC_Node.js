@@ -1,20 +1,10 @@
 {
-  "name": "playground-umc-7th-nodejs",
-  "type": "module",
-  "version": "1.0.0",
-  "description": "UMC 테스트 프로젝트",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "dev": "nodemon --exec node src/index.js"
-  },
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "express": "^5.0.1"
+    "@prisma/adapter-mariadb": "^7.8.0",
+    "@prisma/client": "^7.8.0",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
-    "nodemon": "^3.1.4"
+    "prisma": "^7.8.0"
   }
 }
