@@ -5,7 +5,8 @@
   "esm": true,
   "spec": {
     "outputDirectory": "dist",
-    "specVersion": 3
+    "specVersion": 3,
+    "basePath": "/api/v1"
   },
   "routes": {
     "routesDir": "src/generated"

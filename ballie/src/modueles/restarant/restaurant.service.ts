@@ -30,7 +30,7 @@ export const restaurantAdd = async (data: RestaurantCreateRequest): Promise<Rest
             restaurantId: Number(restaurant.restaurantId),
             restaurantName: restaurant.restaurantName,
             regionName: region.regionName,
-            foodCategory: [foodCategory.categoryName],
+            foodCategory: foodCategory.categoryName,
         };
     } catch (err) {
         if (err instanceof AppError) throw err;

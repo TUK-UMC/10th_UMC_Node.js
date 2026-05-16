@@ -1,7 +1,7 @@
 import { ReviewCreateRequest, ReviewCreateResponse, reviewInfoDTO } from "./review.dto.js";
 import { addReview, getReview, getUserById, getRestaurantById, getReviewsByUserId } from "./review.repository.js";
 import { AppError } from "../../common/error/app.error.js";
-import { RestaurantNotFoundError, ReviewCreateError } from "../../common/error/error.js";
+import { RestaurantNotFoundError, ReviewCreateError, UserNotFoundError } from "../../common/error/error.js";
 
 export const reviewAdd = async (data: ReviewCreateRequest, restaurantId: number): Promise<ReviewCreateResponse> => {
     try {
@@ -36,6 +36,11 @@ export const reviewAdd = async (data: ReviewCreateRequest, restaurantId: number)
 
 export const getUserReviews = async (userId: number): Promise<reviewInfoDTO[]> => {
     try {
+        const user = await getUserById(userId);
+        if (!user) {
+            throw new UserNotFoundError("존재하지 않는 유저입니다");
+        }
+
         const reviews = await getReviewsByUserId(userId);
         return reviews.map((review) => ({
             reviewId: Number(review.reviewId),

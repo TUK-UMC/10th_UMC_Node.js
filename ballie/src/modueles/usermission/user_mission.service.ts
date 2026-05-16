@@ -86,7 +86,7 @@ export const getActiveUserMission = async (userId: number): Promise<ActiveUserMi
     }
 };
 
-export const completeUserMission = async (userMissionId: number): Promise<CompleteUserMissionDTO> => {
+export const completeUserMission = async (userMissionId: number): Promise<void> => {
     try {
         const userMission = await getUserMissionById(userMissionId);
         if (!userMission) {
@@ -97,13 +97,7 @@ export const completeUserMission = async (userMissionId: number): Promise<Comple
             throw new UserMissionStatusError("ACTIVE 상태의 미션만 완료할 수 있습니다.", { userMissionId, currentStatus: userMission.userMissionStatus });
         }
 
-        const result = await updateUserMissionStatus(userMissionId);
-        return {
-            userMissionId: Number(result.userMissionId),
-            userId: Number(result.userId),
-            missionId: Number(result.missionId),
-            userMissionStatus: result.userMissionStatus,
-        };
+        await updateUserMissionStatus(userMissionId);
     } catch (err) {
         if (err instanceof AppError) throw err;
         throw new UserMissionNotFoundError("유저미션 완료 처리 중 오류가 발생했습니다");

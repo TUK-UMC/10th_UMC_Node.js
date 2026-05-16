@@ -26,3 +26,4 @@ export const getRegionById = async (regionId: number) => {
 export const getFoodCategoryById = async (foodCategoryId: number) => {
   return await prisma.foodCategory.findUnique({ where: { foodCategoryId: BigInt(foodCategoryId) } });
 };
+

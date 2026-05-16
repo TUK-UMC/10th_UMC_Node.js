@@ -1,9 +1,10 @@
 import { prisma } from "../../db.config.js";
+import { Gender } from "../../generated/prisma/enums.js";
 
 export const addUser = async (data: {
   email: string;
   name: string;
-  gender: number;
+  gender: Gender;
   birth: Date;
   address: string;
   phoneNumber: string;

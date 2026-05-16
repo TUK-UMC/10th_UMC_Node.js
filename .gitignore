@@ -4,6 +4,7 @@ ballie/.env
 .env
 .idea
 node_modules/
+.gitignore
 
 ### Node ###
 # Logs
@@ -150,11 +151,5 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-<<<<<<< feat/issue-30
-/balie/ch04/src/generated/prisma
-/src/generated/prisma
-/jihen/src/generated/
-.claude/
-=======
-/ballie/ch04/src/generated/prismaballie/src/generated/
->>>>>>> develop
+ballie/ch04/src/generated/prisma
+ballie/src/generated/

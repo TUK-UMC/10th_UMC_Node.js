@@ -10,12 +10,17 @@ datasource db {
   provider = "mysql"
 }
 
+enum Gender {
+  MALE
+  FEMALE
+}
+
 // 유저
 model User {
   userId       BigInt    @id @default(autoincrement()) @map("user_id")
   email        String?   @db.VarChar(50)
   name         String    @map("user_name") @db.VarChar(10)
-  gender       Int?
+  gender       Gender
   birth        DateTime? @map("birthday")
   address      String?   @db.VarChar(50)
   phoneNumber  String?   @map("phone_number") @db.VarChar(20)
@@ -24,6 +29,8 @@ model User {
   region       Region?   @relation(fields: [regionId], references: [regionId])
   isDeleted    Boolean?  @default(false) @map("is_deleted")
   missionPoint Int?      @default(0) @map("mission_point")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   userFavorCategories UserFavorCategory[]
   reviews             Review[]
@@ -35,8 +42,10 @@ model User {
 
 // 음식 카테고리
 model FoodCategory {
-  foodCategoryId      BigInt @id @default(autoincrement()) @map("food_category_id")
-  categoryName        String @db.VarChar(50) @map("food_category_name")
+  foodCategoryId BigInt   @id @default(autoincrement()) @map("food_category_id")
+  categoryName   String   @db.VarChar(50) @map("food_category_name")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   userFavorCategories UserFavorCategory[]
   restaurants         Restaurant[]
@@ -46,9 +55,11 @@ model FoodCategory {
 
 // 유저 선호 음식 카테고리
 model UserFavorCategory {
-  userFavorCategoryId BigInt @id @default(autoincrement()) @map("user_favor_category_id")
-  userId              BigInt @map("user_id")
-  foodCategoryId      BigInt @map("food_category_id")
+  userFavorCategoryId BigInt   @id @default(autoincrement()) @map("user_favor_category_id")
+  userId              BigInt   @map("user_id")
+  foodCategoryId      BigInt   @map("food_category_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   user         User         @relation(fields: [userId], references: [userId])
   foodCategory FoodCategory @relation(fields: [foodCategoryId], references: [foodCategoryId])
@@ -60,8 +71,10 @@ model UserFavorCategory {
 
 // 지역
 model Region {
-  regionId   BigInt @id @default(autoincrement()) @map("region_id")
-  regionName String @map("region_name")
+  regionId   BigInt   @id @default(autoincrement()) @map("region_id")
+  regionName String   @map("region_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
   users          User[]
   restaurants    Restaurant[]
@@ -72,13 +85,15 @@ model Region {
 
 // 식당
 model Restaurant {
-  restaurantId   BigInt  @id @default(autoincrement()) @map("restaurant_id")
-  restaurantName String  @map("restaurant_name") @db.VarChar(20)
-  regionId       BigInt?       @map("region_id")
-  region         Region?       @relation(fields: [regionId], references: [regionId])
-  foodCategoryId BigInt?       @map("food_category_id")
+  restaurantId   BigInt   @id @default(autoincrement()) @map("restaurant_id")
+  restaurantName String   @map("restaurant_name") @db.VarChar(20)
+  regionId       BigInt?  @map("region_id")
+  region         Region?  @relation(fields: [regionId], references: [regionId])
+  foodCategoryId BigInt?  @map("food_category_id")
   foodCategory   FoodCategory? @relation(fields: [foodCategoryId], references: [foodCategoryId])
-  isDeleted      Boolean?      @default(false) @map("is_deleted")
+  isDeleted      Boolean? @default(false) @map("is_deleted")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   reviews            Review[]
   missionRestaurants MissionRestaurant[]
@@ -90,9 +105,11 @@ model Restaurant {
 
 // 식당 이미지
 model RestaurantImage {
-  restaurantImageId  BigInt @id @default(autoincrement()) @map("restaurant_image_id")
-  restaurantId       BigInt @map("restaurant_id")
-  restaurantImageUrl String @db.Text @map("restaurant_image_url")
+  restaurantImageId  BigInt   @id @default(autoincrement()) @map("restaurant_image_id")
+  restaurantId       BigInt   @map("restaurant_id")
+  restaurantImageUrl String   @db.Text @map("restaurant_image_url")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
 
   restaurant Restaurant @relation(fields: [restaurantId], references: [restaurantId])
 
@@ -108,9 +125,11 @@ model Review {
   reviewContent String   @db.Text @map("review_content")
   score         Float
   isDeleted     Boolean? @default(false) @map("is_deleted")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user         User        @relation(fields: [userId], references: [userId])
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [restaurantId])
+  user         User          @relation(fields: [userId], references: [userId])
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [restaurantId])
   reviewImages ReviewImage[]
 
   @@map("review")
@@ -118,9 +137,11 @@ model Review {
 
 // 리뷰 이미지
 model ReviewImage {
-  reviewImageId BigInt @id @default(autoincrement()) @map("review_image_id")
-  reviewId      BigInt @map("review_id")
-  reviewImageUrl String @db.Text @map("review_image_url")
+  reviewImageId  BigInt   @id @default(autoincrement()) @map("review_image_id")
+  reviewId       BigInt   @map("review_id")
+  reviewImageUrl String   @db.Text @map("review_image_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
   review Review @relation(fields: [reviewId], references: [reviewId])
 
@@ -140,6 +161,8 @@ model Mission {
   missionPoint   Int         @map("mission_point")
   missionType    MissionType @map("mission_type")
   isDeleted      Boolean?    @default(false) @map("is_deleted")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
 
   missionRegion     MissionRegion?
   missionRestaurant MissionRestaurant?
@@ -150,9 +173,11 @@ model Mission {
 
 // 지역 미션
 model MissionRegion {
-  missionRegionId BigInt @id @default(autoincrement()) @map("mission_region_id")
-  missionId       BigInt @unique @map("mission_id")
-  regionId        BigInt @map("region_id")
+  missionRegionId BigInt   @id @default(autoincrement()) @map("mission_region_id")
+  missionId       BigInt   @unique @map("mission_id")
+  regionId        BigInt   @map("region_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   mission Mission @relation(fields: [missionId], references: [missionId])
   region  Region  @relation(fields: [regionId], references: [regionId])
@@ -162,9 +187,11 @@ model MissionRegion {
 
 // 식당 미션
 model MissionRestaurant {
-  missionRestaurantId BigInt @id @default(autoincrement()) @map("mission_restaurant_id")
-  missionId           BigInt @unique @map("mission_id")
-  restaurantId        BigInt @map("restaurant_id")
+  missionRestaurantId BigInt   @id @default(autoincrement()) @map("mission_restaurant_id")
+  missionId           BigInt   @unique @map("mission_id")
+  restaurantId        BigInt   @map("restaurant_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   mission    Mission    @relation(fields: [missionId], references: [missionId])
   restaurant Restaurant @relation(fields: [restaurantId], references: [restaurantId])
@@ -181,10 +208,12 @@ enum UserMissionStatus {
 
 // 유저 미션
 model UserMission {
-  userMissionId BigInt            @id @default(autoincrement()) @map("user_mission_id")
-  userId        BigInt            @map("user_id")
-  missionId     BigInt            @map("mission_id")
+  userMissionId     BigInt            @id @default(autoincrement()) @map("user_mission_id")
+  userId            BigInt            @map("user_id")
+  missionId         BigInt            @map("mission_id")
   userMissionStatus UserMissionStatus @default(PENDING) @map("user_mission_status")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
 
   user    User    @relation(fields: [userId], references: [userId])
   mission Mission @relation(fields: [missionId], references: [missionId])
@@ -205,6 +234,8 @@ model Alarm {
   isDeleted    Boolean?  @default(false) @map("is_deleted")
   alarmTitle   String    @db.VarChar(30) @map("alarm_title")
   alarmContent String    @db.Text @map("alarm_content")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   user            User             @relation(fields: [userId], references: [userId])
   alarmNotice     AlarmNotice?
@@ -215,8 +246,10 @@ model Alarm {
 
 // 알람 공지
 model AlarmNotice {
-  alarmNoticeId BigInt @id @default(autoincrement()) @map("alarm_notice_id")
-  alarmId       BigInt @unique @map("alarm_id")
+  alarmNoticeId BigInt   @id @default(autoincrement()) @map("alarm_notice_id")
+  alarmId       BigInt   @unique @map("alarm_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   alarm Alarm @relation(fields: [alarmId], references: [alarmId])
 
@@ -225,9 +258,11 @@ model AlarmNotice {
 
 // 알람 식당
 model AlarmRestaurant {
-  alarmRestaurantId BigInt @id @default(autoincrement()) @map("alarm_restaurant_id")
-  alarmId           BigInt @unique @map("alarm_id")
-  restaurantId      BigInt @map("restaurant_id")
+  alarmRestaurantId BigInt   @id @default(autoincrement()) @map("alarm_restaurant_id")
+  alarmId           BigInt   @unique @map("alarm_id")
+  restaurantId      BigInt   @map("restaurant_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
 
   alarm      Alarm      @relation(fields: [alarmId], references: [alarmId])
   restaurant Restaurant @relation(fields: [restaurantId], references: [restaurantId])

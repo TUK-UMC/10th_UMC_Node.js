@@ -3,10 +3,21 @@ import { ReviewCreateRequest, ReviewCreateResponse } from "./review.dto.js";
 import { reviewAdd } from "./review.service.js";
 import { ApiResponse, success } from "../../common/response/response";
 import { AppError } from "../../common/error/app.error.js";
+import { Response as TsoaResponse } from "tsoa";
+
 
 @Route("review")
 @Tags("review")
 export class ReviewController extends Controller {
+    /**
+     * 리뷰 등록 API
+     * @summary 특정 식당에 리뷰를 등록합니다.
+     * @param restaurantId
+     * @param body
+     */
+    @TsoaResponse<ApiResponse<ReviewCreateResponse>>(201, "리뷰등록 성공")
+    @TsoaResponse<ApiResponse<null>>(404,"존재하지 않는 식당")
+    @TsoaResponse<ApiResponse<null>>(500,"알수없는오류")
     @Post("{restaurantId}")
     public async handleReviewAdd(
         @Path() restaurantId: number,
