@@ -31,6 +31,5 @@ export class UserController extends Controller {
     const user = await userSignUp(body);
     return success(user);
   }
-
 }
 
