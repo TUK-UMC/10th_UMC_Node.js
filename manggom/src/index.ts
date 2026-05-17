@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import express, { Express, Request, Response,NextFunction } from "express";
 import cors from "cors";
@@ -6,6 +7,12 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { AppError } from "./common/errors/app.error.js";
 import { AnyCnameRecord } from "node:dns";
+// src/index.ts
+import swaggerUi from "swagger-ui-express";
+// ESM 환경에서는 JSON 파일을 가져올 때 아래와 같이 처리합니다.
+import path from "path";
+import fs from "fs";
+
 
 const app: Express = express();
 const port = process.env.PORT || 3000;
@@ -61,3 +68,13 @@ app.use((err: any, req: any, res: any, next: any) => {
     next(err);
   }
 });
+
+
+
+// 1. TSOA가 생성한 swagger.json 읽어오기
+const swaggerFile = JSON.parse(
+  fs.readFileSync(path.resolve("dist/swagger.json"), "utf8")
+);
+
+// 2. Swagger UI 연결
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));

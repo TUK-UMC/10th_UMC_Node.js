@@ -51,10 +51,12 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "StoreAddResponse": {
+    "ApiResponse_any_": {
         "dataType": "refObject",
         "properties": {
-            "storeId": {"dataType":"double","required":true},
+            "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
+            "error": {"dataType":"enum","enums":[null],"required":true},
+            "data": {"dataType":"any","required":true},
         },
         "additionalProperties": false,
     },
@@ -69,14 +71,6 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ReviewAddResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "reviewId": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "ReviewAddRequest": {
         "dataType": "refObject",
         "properties": {
@@ -87,39 +81,10 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "ReviewItem": {
-        "dataType": "refObject",
-        "properties": {
-            "id": {"dataType":"double","required":true},
-            "userId": {"dataType":"double","required":true},
-            "storeId": {"dataType":"double","required":true},
-            "detail": {"dataType":"string","required":true},
-            "starScore": {"dataType":"double","required":true},
-            "createdAt": {"dataType":"datetime","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "MissionAddResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "missionId": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "MissionAddRequest": {
         "dataType": "refObject",
         "properties": {
             "explanation": {"dataType":"string","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "UserMissionAddResponse": {
-        "dataType": "refObject",
-        "properties": {
-            "userMissionId": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },

@@ -1,5 +1,5 @@
 import { AppError } from "./app.error.js";
-
+//이메일이 똑같은 유저가 존재하는 에러
 export class DuplicateUserEmailError extends AppError {
   constructor(message: string, data?: unknown) {
     super({
