@@ -1,6 +1,9 @@
+-- Active: 1765701620672@@127.0.0.1@3306
 ### ignore .env ###
+ballie/.env
 .env
-
+.idea
+node_modules/
 
 ### Node ###
 # Logs
@@ -80,7 +83,7 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
+ballie/.env
 .env.development.local
 .env.test.local
 .env.production.local
@@ -146,6 +149,7 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
 
 /src/generated/prisma/
 
