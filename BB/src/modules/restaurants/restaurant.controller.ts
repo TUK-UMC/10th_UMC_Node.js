@@ -1,5 +1,8 @@
-import { Request, Response } from "express";
-import { createReviewService, createMissionService } from "../services/restaurant.service.js";
+import { Request, Response, NextFunction } from "express";
+import { createReviewService, createMissionService } from "./restaurant.service.js";
+import { StatusCodes } from "http-status-codes";
+import { listRestaurantReviewsService, listRestaurantMissionsService } from "./restaurant.service.js";
+import { parseBigInt } from "../../utils/parse.js";
 
 export const createReview = async (req: Request, res: Response) => {
     try {
@@ -10,8 +13,8 @@ export const createReview = async (req: Request, res: Response) => {
             body: req.body
         });
 
-        const restaurantId = Number(req.params.restaurantId);
-        const userId = Number(req.body.userId);
+        const restaurantId = parseBigInt(req.params.restaurantId);
+        const userId = BigInt(req.body.userId);
         const { content, star } = req.body;
 
         console.log("[createReview] parsed request data", {
@@ -84,7 +87,7 @@ export const createReview = async (req: Request, res: Response) => {
 
 export const createMission = async (req: Request, res: Response) => {
     try {
-        const restaurantId = Number(req.params.restaurantId);
+        const restaurantId = parseBigInt(req.params.restaurantId);
         const { name, price, point } = req.body;
 
         const result = await createMissionService(
@@ -98,7 +101,11 @@ export const createMission = async (req: Request, res: Response) => {
             success: true,
             code: "S200",
             message: "가게 등록 성공",
-            data: [result]
+            data: [{
+                ...result,
+                missionId: result.missionId.toString(),
+                restaurantId: result.restaurantId.toString(),
+            }]
         });
 
     } catch (err: any) {
@@ -117,5 +124,45 @@ export const createMission = async (req: Request, res: Response) => {
             message: "서버 에러",
             data: null
         });
+    }
+};
+
+export const listRestaurantReviews = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const restaurantId = parseBigInt(req.params.restaurantId);
+        const cursor =
+            typeof req.query.cursor === "string"
+                ? parseInt(req.query.cursor, 10)
+                : 0;
+
+        const reviews = await listRestaurantReviewsService(restaurantId, cursor);
+
+        res.status(StatusCodes.OK).json(reviews);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const listRestaurantMissions = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const restaurantId = parseBigInt(req.params.restaurantId);
+        const cursor =
+            typeof req.query.cursor === "string"
+                ? parseInt(req.query.cursor, 10)
+                : 0;
+
+        const missions = await listRestaurantMissionsService(restaurantId, cursor);
+
+        res.status(StatusCodes.OK).json(missions);
+    } catch (err) {
+        next(err);
     }
 };

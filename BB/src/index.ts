@@ -1,14 +1,14 @@
 import dotenv from "dotenv";
 import express, { Express, Request, Response } from "express";
 import cors from "cors";
-import { handleUserSignUp, challengeMission } from "./modules/users/controllers/user.controller.js";
-import { createReview, createMission } from "./modules/restaurants/controllers/restaurant.controller.js";
+import { handleUserSignUp, challengeMission, listUserMissions, listUserReviews } from "./modules/users/user.controller.js";
+import { createReview, createMission, listRestaurantReviews, listRestaurantMissions } from "./modules/restaurants/restaurant.controller.js";
 
 // 1. 환경 변수 설정
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // 2. 미들웨어 설정
 app.use(cors());            // cors 방식 허용                 
@@ -21,24 +21,36 @@ app.get("/", (req: Request, res: Response) => {
     res.send("Hello World! This is TypeScript Server!");
 });
 
+
+//User API
 // 회원가입
 app.post("/api/v1/users/signup", handleUserSignUp);
-// 미션 생성
-app.post(
-    "/api/v1/restaurants/:restaurantId/missions",
-    createMission
-);
 // 미션을 진행중인 미션에 추가
 app.post(
     "/api/v1/users/:userId/missions",
     challengeMission
 );
-
+// 내 미션 조회
+app.get("/api/v1/users/:userId/missions", listUserMissions);
 // 리뷰쓰기
 app.post(
     "/api/v1/restaurants/:restaurantId/reviews",
     createReview
 );
+// 내 리뷰 조회
+app.get("/api/v1/users/:userId/reviews", listUserReviews);
+
+
+// Restaurant API
+// // 미션 생성
+app.post(
+    "/api/v1/restaurants/:restaurantId/missions",
+    createMission
+);
+// 가게의 리뷰 조회
+app.get("/api/v1/restaurants/:restaurantId/reviews", listRestaurantReviews);
+// 가게의 미션 조회
+app.get("/api/v1/restaurants/:restaurantId/missions", listRestaurantMissions);
 
 // 4. 서버 시작
 app.listen(port, () => {

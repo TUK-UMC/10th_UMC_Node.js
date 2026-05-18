@@ -150,11 +150,9 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-<<<<<<< feat/issue-30
-/balie/ch04/src/generated/prisma
-/src/generated/prisma
-/jihen/src/generated/
-.claude/
-=======
-/ballie/ch04/src/generated/prismaballie/src/generated/
->>>>>>> develop
+
+/src/generated/prisma/
+
+
+.vscode/
+BB/src/generated/prisma/
