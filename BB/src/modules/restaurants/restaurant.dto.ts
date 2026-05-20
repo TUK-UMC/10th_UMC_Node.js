@@ -1,9 +1,7 @@
-import { Decimal } from "@prisma/client/runtime/client";
-
 export interface CreateReviewDto {
-    missionId: number;
+    userId: string;
     content: string;
-    star: Decimal;
+    star: number;
 }
 
 export interface ReviewRow {
@@ -11,7 +9,7 @@ export interface ReviewRow {
     userId: bigint;
     restaurantId: bigint | null;
     content: string | null;
-    star: Decimal | null;
+    star: { toString(): string } | null;
 }
 
 export interface ReviewItem {
@@ -19,7 +17,7 @@ export interface ReviewItem {
     userId: string;
     restaurantId: string | null;
     content: string | null;
-    star: Decimal | null;
+    star: string | null;
 }
 
 export interface ReviewListResponse {
@@ -50,6 +48,10 @@ export interface MissionListResponse {
     };
 }
 
+
+
+
+
 export const responseFromReviews = (
     reviews: ReviewRow[],
     cursor: number
@@ -62,13 +64,19 @@ export const responseFromReviews = (
             restaurantId: review.restaurantId?.toString() || null,
             userId: review.userId.toString(),
             content: review.content,
-            star: review.star === null ? null : Decimal(review.star),
+            star: review.star?.toString() || null,
         })),
         pagination: {
             cursor: reviews.length === 5 ? cursor + 1 : null,
         },
     };
 };
+
+
+export interface CreateReviewResponse {
+    missions: MissionRow[],
+    cursor: number
+}
 
 export const responseFromMissions = (
     missions: MissionRow[],

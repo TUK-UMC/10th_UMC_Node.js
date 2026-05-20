@@ -1,16 +1,22 @@
-import { ChallengeMissionResponse, UserSignUpRequest, UserSignUpResponse, ReviewListResponse, MissionListResponse, ChallengeMissionRequest } from "./user.dto.js"; //인터페이스 가져오기 
+import {
+    ChallengeMissionRequest,
+    ChallengeMissionResponse,
+    UserMissionListResponse,
+    UserReviewListResponse,
+    UserSignUpRequest,
+    UserSignUpResponse,
+} from "./user.dto.js";
 import {
     addUser,
-    getUser,
-    getUserPreferencesByUserId,
-    setPreference,
     findMission,
     findOngoingMission,
-    insertChallenge,
+    getAllUserMissions,
     getAllUserReviews,
-    getAllUserMissions
+    getUser,
+    getUserPreferencesByUserId,
+    insertChallenge,
+    setPreference,
 } from "./user.repository.js";
-import { Decimal } from "@prisma/client/runtime/client";
 import { DuplicateUserEmailError, MissionAlreadyOngoingError } from "../../common/errors/error.js";
 
 export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpResponse> => {
@@ -18,7 +24,7 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
         email: data.email,
         name: data.name,
         gender: data.gender,
-        birth: new Date(data.birth), // 문자열을 Date 객체로 변환해서 넘겨줍니다. 
+        birth: new Date(data.birth),
         address: data.address,
         phone: data.phone,
     });
@@ -32,65 +38,71 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
     }
 
     const user = await getUser(joinUserId);
-    const userId = user!.id;
-    const preferences = (await getUserPreferencesByUserId(joinUserId)).map(
-        (obj) => obj.category.name,
-    );
+    if (!user) {
+        throw new Error("USER_NOT_EXIST");
+    }
 
-    return <UserSignUpResponse>{
-        userId,
+    const preferences = (await getUserPreferencesByUserId(joinUserId))
+        .map((obj) => obj.category.name)
+        .filter((name): name is string => name !== null);
+
+    return {
+        userId: user.id.toString(),
         preferences,
-        name: user!.name,
-        email: user!.email,
-        gender: user!.gender,
-        birth: user!.birth,
-        address: user!.address,
-        phone: user!.phone,
+        name: user.name ?? "",
+        email: user.email ?? "",
+        gender: user.gender ?? "",
+        birth: user.birth ?? new Date(),
+        address: user.address ?? undefined,
+        phone: user.phone ?? "",
     };
 };
 
 export const challengeMissionService = async (
     data: ChallengeMissionRequest
 ): Promise<ChallengeMissionResponse> => {
-    // 1. 유저 확인
-    const user = await getUser(data.userId);
-    if (!user) throw new Error("USER_NOT_EXIST");
+    const userId = BigInt(data.userId);
+    const missionId = BigInt(data.missionId);
 
-    // 2. 미션 확인
-    const mission = await findMission(data.missionId);
-    if (!mission) throw new Error("MISSION_NOT_EXIST");
-    if (!mission.restaurantId) throw new Error("MISSION_RESTAURANT_NOT_EXIST");
+    const user = await getUser(userId);
+    if (!user) {
+        throw new Error("USER_NOT_EXIST");
+    }
 
-    // 3. 중복 체크
-    const exist = await findOngoingMission(data.userId, data.missionId);
-    if (exist) throw new MissionAlreadyOngoingError("이미 진행 중인 미션입니다.", data);
+    const mission = await findMission(missionId);
+    if (!mission) {
+        throw new Error("MISSION_NOT_EXIST");
+    }
+    if (!mission.restaurantId) {
+        throw new Error("MISSION_RESTAURANT_NOT_EXIST");
+    }
 
-    // 4. insert
-    await insertChallenge(
-        data.userId,
-        data.missionId,
-        mission.restaurantId
-    );
+    const exist = await findOngoingMission(userId, missionId);
+    if (exist) {
+        throw new MissionAlreadyOngoingError("이미 진행 중인 미션입니다.", data);
+    }
+
+    await insertChallenge(userId, missionId, mission.restaurantId);
 
     return {
-        missionId: data.missionId.toString(),
-        status: "ONGOING"
+        missionId: missionId.toString(),
+        status: "ONGOING",
     };
 };
 
 export const listUserReviewsService = async (
     userId: bigint,
     cursor: number
-): Promise<ReviewListResponse> => {
+): Promise<UserReviewListResponse> => {
     const reviews = await getAllUserReviews(userId, cursor);
-    return <ReviewListResponse>{
+
+    return {
         data: reviews.map((review) => ({
-            ...review,
             id: review.id.toString(),
             userId: review.userId.toString(),
             restaurantId: review.restaurantId?.toString() || null,
             content: review.content,
-            star: review.star === null ? null : Decimal(review.star),
+            star: review.star?.toString() || null,
         })),
         pagination: {
             cursor: reviews.length === 5 ? cursor + 1 : null,
@@ -101,15 +113,15 @@ export const listUserReviewsService = async (
 export const listUserMissionsService = async (
     userId: bigint,
     cursor: number
-): Promise<MissionListResponse> => {
+): Promise<UserMissionListResponse> => {
     const missions = await getAllUserMissions(userId, cursor);
-    return <MissionListResponse>{
-        data: missions.map((complete) => ({
-            ...complete,
-            id: complete.id.toString(),
-            restaurantId: complete.restaurantId?.toString() || null,
-            price: complete.price,
-            point: complete.point,
+
+    return {
+        data: missions.map((mission) => ({
+            id: mission.id.toString(),
+            restaurantId: mission.restaurantId?.toString() || null,
+            price: mission.price,
+            point: mission.point,
         })),
         pagination: {
             cursor: missions.length === 5 ? cursor + 1 : null,

@@ -1,7 +1,7 @@
-import { Request as ExpressRequest, Response, NextFunction } from "express";
-import { Body, Controller, Post, Route, Tags, Path, Get, Query, Request, Middlewares, Res, } from "tsoa";
+import { Request as ExpressRequest, Response as ExpressResponse, NextFunction } from "express";
+import { Body, Controller, Post, Route, Tags, Path, Get, Query, Request, Middlewares, Res, Response } from "tsoa";
 import { StatusCodes } from "http-status-codes";
-import { UserSignUpRequest, UserSignUpResponse, ChallengeMissionRequest, ChallengeMissionResponse, MissionListResponse, ReviewListResponse } from "./user.dto.js";
+import { UserSignUpRequest, UserSignUpResponse, ChallengeMissionRequest, ChallengeMissionResponse, UserMissionListResponse, UserReviewListResponse } from "./user.dto.js";
 import { userSignUp, challengeMissionService, listUserReviewsService, listUserMissionsService } from "./user.service.js";
 import { parseBigInt } from "../../utils/parse.js";
 import { authorizeUser } from "../../common/middlewares/auth.middleware.js";
@@ -11,6 +11,8 @@ import { ApiResponse, success } from "../../common/responses/response.js";
 @Tags("Users")
 export class UserController extends Controller {
     @Post("signup")
+    @Response<ApiResponse<UserSignUpResponse>>(200, "회원가입 성공")
+    @Response<ApiResponse<null>>(400, "중복된 이메일 에러")
     public async handleUserSignUp(
         @Body() body: UserSignUpRequest
     ): Promise<ApiResponse<UserSignUpResponse>> {
@@ -47,7 +49,7 @@ export class UserController extends Controller {
     public async listUserMissions(
         @Path() userId: string,
         @Query() cursor: number = 0
-    ): Promise<ApiResponse<MissionListResponse>> {
+    ): Promise<ApiResponse<UserMissionListResponse>> {
         const parsedUserId = parseBigInt(userId);
 
         const missions = await listUserMissionsService(
@@ -65,7 +67,7 @@ export class UserController extends Controller {
     public async listUserReviews(
         @Path() userId: string,
         @Query() cursor: number = 0
-    ): Promise<ApiResponse<ReviewListResponse>> {
+    ): Promise<ApiResponse<UserReviewListResponse>> {
         const parsedUserId = parseBigInt(userId);
 
         const reviews = await listUserReviewsService(

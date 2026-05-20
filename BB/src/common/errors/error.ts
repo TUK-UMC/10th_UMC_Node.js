@@ -10,7 +10,6 @@ export class DuplicateUserEmailError extends AppError {
         });
     }
 }
-
 export class InvalidCredentialsError extends AppError {
     constructor(message: string, data?: unknown) {
         super({
@@ -21,12 +20,33 @@ export class InvalidCredentialsError extends AppError {
         });
     }
 }
-
 export class MissionAlreadyOngoingError extends AppError {
     constructor(message: string, data?: unknown) {
         super({
             errorCode: "MISSION_ALREADY_ONGOING",
             statusCode: 400,
+            message,
+            data,
+        });
+    }
+}
+
+export class RestaurantNotFoundError extends AppError {
+    constructor(message: string, data?: unknown) {
+        super({
+            errorCode: "RESTAURANT_NOT_EXIST",
+            statusCode: 404,
+            message,
+            data,
+        });
+    }
+}
+
+export class ReviewAlreadyExistsError extends AppError {
+    constructor(message: string, data?: unknown) {
+        super({
+            errorCode: "REVIEW_ALREADY_EXISTS",
+            statusCode: 409,
             message,
             data,
         });

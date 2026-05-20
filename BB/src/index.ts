@@ -6,6 +6,9 @@ import { RegisterRoutes } from "./generated/routes.js";
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { AppError } from "./common/errors/app.error.js";
+import swaggerUi from "swagger-ui-express";
+import path from "path";
+import fs from "fs";
 
 // 1. 환경 변수 설정
 dotenv.config();
@@ -49,6 +52,14 @@ app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
         data: err.data || null,
     });
 });
+
+// 1. TSOA가 생성한 swagger.json 읽어오기
+const swaggerFile = JSON.parse(
+    fs.readFileSync(path.resolve("dist/swagger.json"), "utf8")
+);
+
+// 2. Swagger UI 연결
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // ---------------------------- tsoa 이전
 

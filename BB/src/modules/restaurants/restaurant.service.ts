@@ -1,23 +1,16 @@
 import * as repo from "./restaurant.repository.js";
-import { responseFromReviews, ReviewListResponse, MissionListResponse, responseFromMissions } from "./restaurant.dto.js";
-
+import { responseFromReviews, ReviewListResponse, MissionListResponse, responseFromMissions, CreateReviewDto } from "./restaurant.dto.js";
+import { RestaurantNotFoundError, ReviewAlreadyExistsError } from "../../common/errors/error.js";
 
 export const createReviewService = async (
-    userId: bigint,
     restaurantId: bigint,
-    content: string,
-    star: number
-) => {
-    console.log("[createReviewService] start", {
-        userId,
-        restaurantId,
-        content,
-        star
-    });
+    data: CreateReviewDto
+): Promise<ReviewListResponse> => {
+    const userId = BigInt(data.userId);
 
     if (userId <= 0n) {
         console.error("[createReviewService] userId is invalid", {
-            userId
+            userId: data.userId
         });
         throw new Error("INVALID_USER_ID");
     }
@@ -35,24 +28,29 @@ export const createReviewService = async (
         restaurantId
     });
     if (!restaurant) {
-        throw new Error("RESTAURANT_NOT_EXIST");
+        throw new RestaurantNotFoundError("존재하지 않는 식당입니다.", { restaurantId: restaurantId.toString() });
     }
 
     const exist = await repo.findReview(userId);
     console.log("[createReviewService] existing review lookup result", {
         exists: !!exist,
-        userId
+        userId: data.userId
     });
     if (exist) {
-        throw new Error("REVIEW_ALREADY_EXISTS");
+        throw new ReviewAlreadyExistsError("이미 작성한 리뷰가 있습니다.", { userId: data.userId });
     }
 
-    await repo.createReview(userId, restaurantId, content, star);
+    await repo.createReview(userId, restaurantId, data.content, data.star);
     console.log("[createReviewService] review created", {
-        userId,
+        userId: data.userId,
         restaurantId
     });
+
+    const reviews = await repo.getAllRestaurantReviews(restaurantId, 0);
+    return responseFromReviews(reviews, 0);
 };
+
+
 
 export const createMissionService = async (
     restaurantId: bigint,
