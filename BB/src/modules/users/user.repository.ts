@@ -21,13 +21,13 @@ export const addUser = async (data: any) => {
     return created.id;
 };
 
-export const getUser = async (userId: bigint) => {
+export const getUser = async (userId: number) => {
     return await prisma.user.findUnique({
         where: { id: userId },
     });
 };
 
-export const setPreference = async (userId: bigint, categoryId: bigint) => {
+export const setPreference = async (userId: number, categoryId: number) => {
     await prisma.userPreference.create({
         data: {
             userId,
@@ -36,7 +36,7 @@ export const setPreference = async (userId: bigint, categoryId: bigint) => {
     });
 };
 
-export const getUserPreferencesByUserId = async (userId: bigint) => {
+export const getUserPreferencesByUserId = async (userId: number) => {
     return await prisma.userPreference.findMany({
         where: { userId },
         include: {
@@ -46,13 +46,13 @@ export const getUserPreferencesByUserId = async (userId: bigint) => {
     });
 };
 
-export const findMission = async (missionId: bigint) => {
+export const findMission = async (missionId: number) => {
     return await prisma.mission.findUnique({
         where: { id: missionId },
     });
 };
 
-export const findOngoingMission = async (userId: bigint, missionId: bigint) => {
+export const findOngoingMission = async (userId: number, missionId: number) => {
     return await prisma.complete.findFirst({
         where: {
             userId,
@@ -63,9 +63,9 @@ export const findOngoingMission = async (userId: bigint, missionId: bigint) => {
 };
 
 export const insertChallenge = async (
-    userId: bigint,
-    missionId: bigint,
-    restaurantId: bigint
+    userId: number,
+    missionId: number,
+    restaurantId: number
 ) => {
     await prisma.complete.create({
         data: {
@@ -78,7 +78,7 @@ export const insertChallenge = async (
 };
 
 export const getAllUserReviews = async (
-    userId: bigint,
+    userId: number,
     cursor: number
 ) => {
     const take = 5;
@@ -103,7 +103,7 @@ export const getAllUserReviews = async (
 };
 
 export const getAllUserMissions = async (
-    userId: bigint,
+    userId: number,
     cursor: number
 ) => {
     const take = 5;

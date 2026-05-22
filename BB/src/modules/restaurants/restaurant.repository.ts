@@ -1,20 +1,20 @@
 import { prisma } from "../../db.config.js";
 
-export const findMission = async (missionId: bigint) => {
+export const findMission = async (missionId: number) => {
     return await prisma.mission.findUnique({
         where: { id: missionId },
     });
 };
 
-export const findReview = async (userId: bigint) => {
+export const findReview = async (userId: number) => {
     return await prisma.review.findFirst({
         where: { userId },
     });
 };
 
 export const createReview = async (
-    userId: bigint,
-    restaurantId: bigint,
+    userId: number,
+    restaurantId: number,
     content: string,
     star: number
 ) => {
@@ -30,7 +30,7 @@ export const createReview = async (
 };
 
 export const createMission = async (
-    restaurantId: bigint,
+    restaurantId: number,
     name: string,
     price: number | null,
     point: number | null
@@ -53,14 +53,14 @@ export const createMission = async (
     };
 };
 
-export const findRestaurant = async (restaurantId: bigint) => {
+export const findRestaurant = async (restaurantId: number) => {
     return await prisma.restaurant.findUnique({
         where: { id: restaurantId },
     });
 };
 
 export const getAllRestaurantReviews = async (
-    restaurantId: bigint,
+    restaurantId: number,
     cursor: number
 ) => {
     const take = 5;
@@ -85,7 +85,7 @@ export const getAllRestaurantReviews = async (
 };
 
 export const getAllRestaurantMissions = async (
-    restaurantId: bigint,
+    restaurantId: number,
     cursor: number
 ) => {
     const take = 5;

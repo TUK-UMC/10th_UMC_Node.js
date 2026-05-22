@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE `User` (
-    `user_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NULL,
     `gender` VARCHAR(10) NULL,
     `birth` DATE NULL,
@@ -21,7 +21,7 @@ CREATE TABLE `User` (
 
 -- CreateTable
 CREATE TABLE `FoodCategory` (
-    `category_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `category_id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(100) NULL,
     `created_at` DATETIME(6) NULL,
     `updated_at` DATETIME(6) NULL,
@@ -31,9 +31,9 @@ CREATE TABLE `FoodCategory` (
 
 -- CreateTable
 CREATE TABLE `UserPreference` (
-    `user_preference_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `category_id` BIGINT NOT NULL,
-    `user_id` BIGINT NOT NULL,
+    `user_preference_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `category_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
     `created_at` DATETIME(6) NULL,
     `updated_at` DATETIME(6) NULL,
 
@@ -42,7 +42,7 @@ CREATE TABLE `UserPreference` (
 
 -- CreateTable
 CREATE TABLE `Restaurant` (
-    `restaurant_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `restaurant_id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(50) NULL,
     `address` VARCHAR(255) NULL,
     `open` TIME(0) NULL,
@@ -54,8 +54,8 @@ CREATE TABLE `Restaurant` (
 
 -- CreateTable
 CREATE TABLE `RestaurantImage` (
-    `restaurant_image_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `restaurant_id` BIGINT NOT NULL,
+    `restaurant_image_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `restaurant_id` INTEGER NOT NULL,
     `image_url` VARCHAR(255) NULL,
 
     PRIMARY KEY (`restaurant_image_id`)
@@ -63,8 +63,8 @@ CREATE TABLE `RestaurantImage` (
 
 -- CreateTable
 CREATE TABLE `Mission` (
-    `mission_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `restaurant_id` BIGINT NULL,
+    `mission_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `restaurant_id` INTEGER NULL,
     `deadline` DATETIME(3) NULL,
     `price` INTEGER NULL,
     `point` INTEGER NULL,
@@ -76,10 +76,10 @@ CREATE TABLE `Mission` (
 
 -- CreateTable
 CREATE TABLE `Complete` (
-    `complete_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `user_id` BIGINT NOT NULL,
-    `mission_id` BIGINT NOT NULL,
-    `restaurant_id` BIGINT NOT NULL,
+    `complete_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `mission_id` INTEGER NOT NULL,
+    `restaurant_id` INTEGER NOT NULL,
     `is_completed` BOOLEAN NULL,
     `completed_at` DATETIME(3) NULL,
 
@@ -88,9 +88,9 @@ CREATE TABLE `Complete` (
 
 -- CreateTable
 CREATE TABLE `Review` (
-    `review_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `restaurant_id` BIGINT NOT NULL,
-    `user_id` BIGINT NOT NULL,
+    `review_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `restaurant_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
     `content` TEXT NULL,
     `star` DECIMAL(2, 1) NULL,
     `answer` TEXT NULL,
@@ -101,10 +101,10 @@ CREATE TABLE `Review` (
 
 -- CreateTable
 CREATE TABLE `ReviewImage` (
-    `review_image_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `review_id` BIGINT NOT NULL,
-    `restaurant_id` BIGINT NOT NULL,
-    `user_id` BIGINT NOT NULL,
+    `review_image_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `review_id` INTEGER NOT NULL,
+    `restaurant_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
     `image_url` VARCHAR(255) NULL,
 
     PRIMARY KEY (`review_image_id`)
@@ -112,8 +112,8 @@ CREATE TABLE `ReviewImage` (
 
 -- CreateTable
 CREATE TABLE `Alarm` (
-    `alarm_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `user_id` BIGINT NOT NULL,
+    `alarm_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
     `alarm_type` ENUM('MISSION', 'REVIEW') NULL,
     `title` VARCHAR(50) NULL,
     `content` TEXT NULL,
@@ -127,8 +127,8 @@ CREATE TABLE `Alarm` (
 
 -- CreateTable
 CREATE TABLE `UserAlarmSetting` (
-    `user_alarm_setting_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `user_id` BIGINT NOT NULL,
+    `user_alarm_setting_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
     `alarm_type` ENUM('MISSION', 'REVIEW') NULL,
     `is_enabled` BOOLEAN NULL,
 
@@ -137,8 +137,8 @@ CREATE TABLE `UserAlarmSetting` (
 
 -- CreateTable
 CREATE TABLE `Inquiry` (
-    `inquiry_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `user_id` BIGINT NOT NULL,
+    `inquiry_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
     `title` VARCHAR(100) NULL,
     `content` VARCHAR(200) NULL,
     `created_at` DATETIME(6) NULL,
@@ -149,9 +149,9 @@ CREATE TABLE `Inquiry` (
 
 -- CreateTable
 CREATE TABLE `InquiryImage` (
-    `inquiry_image_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `inquiry_id` BIGINT NOT NULL,
-    `user_id` BIGINT NOT NULL,
+    `inquiry_image_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `inquiry_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
     `image_url` VARCHAR(255) NULL,
 
     PRIMARY KEY (`inquiry_image_id`)
@@ -159,9 +159,9 @@ CREATE TABLE `InquiryImage` (
 
 -- CreateTable
 CREATE TABLE `Answer` (
-    `answer_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `inquiry_id` BIGINT NOT NULL,
-    `user_id` BIGINT NOT NULL,
+    `answer_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `inquiry_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
     `content` TEXT NULL,
     `created_at` DATETIME(6) NULL,
 

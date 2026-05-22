@@ -3,7 +3,6 @@ import { Body, Controller, Post, Route, Tags, Path, Get, Query, Request, Middlew
 import { StatusCodes } from "http-status-codes";
 import { UserSignUpRequest, UserSignUpResponse, ChallengeMissionRequest, ChallengeMissionResponse, UserMissionListResponse, UserReviewListResponse } from "./user.dto.js";
 import { userSignUp, challengeMissionService, listUserReviewsService, listUserMissionsService } from "./user.service.js";
-import { parseBigInt } from "../../utils/parse.js";
 import { authorizeUser } from "../../common/middlewares/auth.middleware.js";
 import { ApiResponse, success } from "../../common/responses/response.js";
 
@@ -25,7 +24,7 @@ export class UserController extends Controller {
     // 미션 도전
     @Post("{userId}/missions/challenge")
     public async challengeMission(
-        @Path() userId: string,
+        @Path() userId: number,
         @Body() body: ChallengeMissionRequest
     ): Promise<ApiResponse<ChallengeMissionResponse>> {
 
@@ -34,7 +33,7 @@ export class UserController extends Controller {
         );
 
         const response: ChallengeMissionResponse = {
-            missionId: result.missionId.toString(),
+            missionId: result.missionId,
             status: result.status
         };
 
@@ -47,13 +46,11 @@ export class UserController extends Controller {
     // 진행 중인 미션 목록 조회
     @Get("{userId}/missions")
     public async listUserMissions(
-        @Path() userId: string,
+        @Path() userId: number,
         @Query() cursor: number = 0
     ): Promise<ApiResponse<UserMissionListResponse>> {
-        const parsedUserId = parseBigInt(userId);
-
         const missions = await listUserMissionsService(
-            parsedUserId,
+            userId,
             cursor
         );
 
@@ -65,13 +62,11 @@ export class UserController extends Controller {
     // 내가 작성한 리뷰 목록 조회
     @Get("{userId}/reviews")
     public async listUserReviews(
-        @Path() userId: string,
+        @Path() userId: number,
         @Query() cursor: number = 0
     ): Promise<ApiResponse<UserReviewListResponse>> {
-        const parsedUserId = parseBigInt(userId);
-
         const reviews = await listUserReviewsService(
-            parsedUserId,
+            userId,
             cursor
         );
 
@@ -123,8 +118,8 @@ export class UserController extends Controller {
 /*
 export const challengeMission = async (req: Request, res: Response) => {
     try {
-        const userId = parseBigInt(req.params.userId);
-        const missionId = BigInt(req.body.missionId);
+        const userId = parseId(req.params.userId);
+        const missionId = Number(req.body.missionId);
 
         const result = await challengeMissionService(userId, missionId);
 
@@ -134,7 +129,7 @@ export const challengeMission = async (req: Request, res: Response) => {
             message: "미션 도전 요청 성공",
             data: [{
                 ...result,
-                missionId: result.missionId.toString(),
+                missionId: result.missionId,
             }]
         });
 
@@ -163,7 +158,7 @@ export const listUserMissions = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const userId = parseBigInt(req.params.userId);
+        const userId = parseId(req.params.userId);
         const cursor =
             typeof req.query.cursor === "string"
                 ? parseInt(req.query.cursor, 10)
@@ -183,7 +178,7 @@ export const listUserReviews = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const userId = parseBigInt(req.params.userId);
+        const userId = parseId(req.params.userId);
         const cursor =
             typeof req.query.cursor === "string"
                 ? parseInt(req.query.cursor, 10)

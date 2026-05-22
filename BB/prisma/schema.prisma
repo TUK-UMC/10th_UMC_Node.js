@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../../src/generated/prisma" 
+  output   = "../src/generated/prisma" 
 }
 
 datasource db {
@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id               BigInt    @id @default(autoincrement()) @map("user_id")
+  id               Int       @id @default(autoincrement()) @map("user_id")
   name             String?   @db.VarChar(50)
   gender           String?   @db.VarChar(10)
   birth            DateTime? @db.Date
@@ -38,7 +38,7 @@ model User {
 }
 
 model FoodCategory {
-  id          BigInt    @id @default(autoincrement()) @map("category_id")
+  id          Int       @id @default(autoincrement()) @map("category_id")
   name        String?   @db.VarChar(100)
   createdAt   DateTime? @db.DateTime(6) @map("created_at")
   updatedAt   DateTime? @db.DateTime(6) @map("updated_at")
@@ -49,9 +49,9 @@ model FoodCategory {
 }
 
 model UserPreference {
-  id          BigInt    @id @default(autoincrement()) @map("user_preference_id")
-  categoryId  BigInt    @map("category_id")
-  userId      BigInt    @map("user_id")
+  id          Int       @id @default(autoincrement()) @map("user_preference_id")
+  categoryId  Int       @map("category_id")
+  userId      Int       @map("user_id")
   createdAt   DateTime? @db.DateTime(6) @map("created_at")
   updatedAt   DateTime? @db.DateTime(6) @map("updated_at")
 
@@ -62,7 +62,7 @@ model UserPreference {
 }
 
 model Restaurant {
-  id           BigInt    @id @default(autoincrement()) @map("restaurant_id")
+  id           Int       @id @default(autoincrement()) @map("restaurant_id")
   name         String?   @db.VarChar(50)
   address      String?   @db.VarChar(255)
   open         DateTime? @db.Time(0)
@@ -79,8 +79,8 @@ model Restaurant {
 }
 
 model RestaurantImage {
-  id           BigInt   @id @default(autoincrement()) @map("restaurant_image_id")
-  restaurantId BigInt   @map("restaurant_id")
+  id           Int      @id @default(autoincrement()) @map("restaurant_image_id")
+  restaurantId Int      @map("restaurant_id")
   imageUrl     String?  @db.VarChar(255) @map("image_url")
 
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
@@ -89,8 +89,8 @@ model RestaurantImage {
 }
 
 model Mission {
-  id           BigInt    @id @default(autoincrement()) @map("mission_id")
-  restaurantId BigInt?   @map("restaurant_id")
+  id           Int       @id @default(autoincrement()) @map("mission_id")
+  restaurantId Int?      @map("restaurant_id")
   deadline     DateTime?
   price        Int?
   point        Int?
@@ -104,10 +104,10 @@ model Mission {
 }
 
 model Complete {
-  id           BigInt    @id @default(autoincrement()) @map("complete_id")
-  userId       BigInt    @map("user_id")
-  missionId    BigInt    @map("mission_id")
-  restaurantId BigInt    @map("restaurant_id")
+  id           Int       @id @default(autoincrement()) @map("complete_id")
+  userId       Int       @map("user_id")
+  missionId    Int       @map("mission_id")
+  restaurantId Int       @map("restaurant_id")
   isCompleted  Boolean?  @map("is_completed")
   completedAt  DateTime? @map("completed_at")
 
@@ -119,9 +119,9 @@ model Complete {
 }
 
 model Review {
-  id           BigInt    @id @default(autoincrement()) @map("review_id")
-  restaurantId BigInt    @map("restaurant_id")
-  userId       BigInt    @map("user_id")
+  id           Int       @id @default(autoincrement()) @map("review_id")
+  restaurantId Int       @map("restaurant_id")
+  userId       Int       @map("user_id")
   content      String?   @db.Text
   star         Decimal?  @db.Decimal(2, 1)
   answer       String?   @db.Text
@@ -136,10 +136,10 @@ model Review {
 }
 
 model ReviewImage {
-  id           BigInt   @id @default(autoincrement()) @map("review_image_id")
-  reviewId     BigInt   @map("review_id")
-  restaurantId BigInt   @map("restaurant_id")
-  userId       BigInt   @map("user_id")
+  id           Int      @id @default(autoincrement()) @map("review_image_id")
+  reviewId     Int      @map("review_id")
+  restaurantId Int      @map("restaurant_id")
+  userId       Int      @map("user_id")
   imageUrl     String?  @db.VarChar(255) @map("image_url")
 
   review       Review     @relation(fields: [reviewId], references: [id])
@@ -150,8 +150,8 @@ model ReviewImage {
 }
 
 model Alarm {
-  id           BigInt     @id @default(autoincrement()) @map("alarm_id")
-  userId       BigInt     @map("user_id")
+  id           Int        @id @default(autoincrement()) @map("alarm_id")
+  userId       Int        @map("user_id")
   alarmType    AlarmType? @map("alarm_type")
   title        String?    @db.VarChar(50)
   content      String?    @db.Text
@@ -166,8 +166,8 @@ model Alarm {
 }
 
 model UserAlarmSetting {
-  id           BigInt     @id @default(autoincrement()) @map("user_alarm_setting_id")
-  userId       BigInt     @map("user_id")
+  id           Int        @id @default(autoincrement()) @map("user_alarm_setting_id")
+  userId       Int        @map("user_id")
   alarmType    AlarmType? @map("alarm_type")
   isEnabled    Boolean?   @map("is_enabled")
 
@@ -177,8 +177,8 @@ model UserAlarmSetting {
 }
 
 model Inquiry {
-  id           BigInt    @id @default(autoincrement()) @map("inquiry_id")
-  userId       BigInt    @map("user_id")
+  id           Int       @id @default(autoincrement()) @map("inquiry_id")
+  userId       Int       @map("user_id")
   title        String?   @db.VarChar(100)
   content      String?   @db.VarChar(200)
   createdAt    DateTime? @db.DateTime(6) @map("created_at")
@@ -193,9 +193,9 @@ model Inquiry {
 }
 
 model InquiryImage {
-  id           BigInt   @id @default(autoincrement()) @map("inquiry_image_id")
-  inquiryId    BigInt   @map("inquiry_id")
-  userId       BigInt   @map("user_id")
+  id           Int      @id @default(autoincrement()) @map("inquiry_image_id")
+  inquiryId    Int      @map("inquiry_id")
+  userId       Int      @map("user_id")
   imageUrl     String?  @db.VarChar(255) @map("image_url")
 
   inquiry      Inquiry @relation(fields: [inquiryId], references: [id])
@@ -205,9 +205,9 @@ model InquiryImage {
 }
 
 model Answer {
-  id           BigInt    @id @default(autoincrement()) @map("answer_id")
-  inquiryId    BigInt    @map("inquiry_id")
-  userId       BigInt    @map("user_id")
+  id           Int       @id @default(autoincrement()) @map("answer_id")
+  inquiryId    Int       @map("inquiry_id")
+  userId       Int       @map("user_id")
   content      String?   @db.Text
   createdAt    DateTime? @db.DateTime(6) @map("created_at")
 

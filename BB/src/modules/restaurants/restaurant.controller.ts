@@ -7,7 +7,7 @@ import {
     listRestaurantMissionsService,
     listRestaurantReviewsService,
 } from "./restaurant.service.js";
-import { parseBigInt } from "../../utils/parse.js";
+import { parseId } from "../../utils/parse.js";
 import { CreateReviewDto, MissionListResponse, ReviewListResponse } from "./restaurant.dto.js";
 import { ApiResponse, success } from "../../common/responses/response.js";
 
@@ -22,23 +22,21 @@ interface CreateMissionDto {
 export class RestaurantController extends Controller {
     @Post("{restaurantId}/reviews")
     public async createReview(
-        @Path() restaurantId: string,
+        @Path() restaurantId: number,
         @Body() body: CreateReviewDto
     ): Promise<ApiResponse<ReviewListResponse>> {
-        const parsedRestaurantId = parseBigInt(restaurantId);
-        const result = await createReviewService(parsedRestaurantId, body);
+        const result = await createReviewService(restaurantId, body);
 
         return success(result);
     }
 
     @Post("{restaurantId}/missions")
     public async createMission(
-        @Path() restaurantId: string,
+        @Path() restaurantId: number,
         @Body() body: CreateMissionDto
     ): Promise<ApiResponse<MissionListResponse>> {
-        const parsedRestaurantId = parseBigInt(restaurantId);
         const result = await createMissionService(
-            parsedRestaurantId,
+            restaurantId,
             body.name,
             body.price,
             body.point
@@ -46,8 +44,8 @@ export class RestaurantController extends Controller {
 
         return success({
             data: [{
-                id: result.missionId.toString(),
-                restaurantId: result.restaurantId.toString(),
+                id: result.missionId,
+                restaurantId: result.restaurantId,
                 price: result.price,
                 point: result.point,
             }],
@@ -62,7 +60,7 @@ export const listRestaurantReviews = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
+        const restaurantId = parseId(req.params.restaurantId);
         const cursor = typeof req.query.cursor === "string"
             ? parseInt(req.query.cursor, 10)
             : 0;
@@ -81,7 +79,7 @@ export const listRestaurantMissions = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
+        const restaurantId = parseId(req.params.restaurantId);
         const cursor = typeof req.query.cursor === "string"
             ? parseInt(req.query.cursor, 10)
             : 0;
@@ -100,7 +98,7 @@ export const createReview = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
+        const restaurantId = parseId(req.params.restaurantId);
         const result = await createReviewService(restaurantId, req.body);
         res.status(StatusCodes.OK).json(success(result));
     } catch (err) {
@@ -114,14 +112,14 @@ export const createMission = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
+        const restaurantId = parseId(req.params.restaurantId);
         const { name, price, point } = req.body as CreateMissionDto;
         const result = await createMissionService(restaurantId, name, price, point);
 
         res.status(StatusCodes.OK).json(success({
             data: [{
-                id: result.missionId.toString(),
-                restaurantId: result.restaurantId.toString(),
+                id: result.missionId,
+                restaurantId: result.restaurantId,
                 price: result.price,
                 point: result.point,
             }],

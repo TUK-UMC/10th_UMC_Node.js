@@ -3,19 +3,19 @@ import { responseFromReviews, ReviewListResponse, MissionListResponse, responseF
 import { RestaurantNotFoundError, ReviewAlreadyExistsError } from "../../common/errors/error.js";
 
 export const createReviewService = async (
-    restaurantId: bigint,
+    restaurantId: number,
     data: CreateReviewDto
 ): Promise<ReviewListResponse> => {
-    const userId = BigInt(data.userId);
+    const { userId } = data;
 
-    if (userId <= 0n) {
+    if (!Number.isSafeInteger(userId) || userId <= 0) {
         console.error("[createReviewService] userId is invalid", {
             userId: data.userId
         });
         throw new Error("INVALID_USER_ID");
     }
 
-    if (restaurantId <= 0n) {
+    if (!Number.isSafeInteger(restaurantId) || restaurantId <= 0) {
         console.error("[createReviewService] restaurantId is invalid", {
             restaurantId
         });
@@ -28,7 +28,7 @@ export const createReviewService = async (
         restaurantId
     });
     if (!restaurant) {
-        throw new RestaurantNotFoundError("존재하지 않는 식당입니다.", { restaurantId: restaurantId.toString() });
+        throw new RestaurantNotFoundError("존재하지 않는 식당입니다.", { restaurantId });
     }
 
     const exist = await repo.findReview(userId);
@@ -53,7 +53,7 @@ export const createReviewService = async (
 
 
 export const createMissionService = async (
-    restaurantId: bigint,
+    restaurantId: number,
     name: string,
     price: number | null,
     point: number | null
@@ -70,7 +70,7 @@ export const createMissionService = async (
 };
 
 export const listRestaurantReviewsService = async (
-    restaurantId: bigint,
+    restaurantId: number,
     cursor: number
 ): Promise<ReviewListResponse> => {
     const reviews = await repo.getAllRestaurantReviews(restaurantId, cursor);
@@ -78,7 +78,7 @@ export const listRestaurantReviewsService = async (
 };
 
 export const listRestaurantMissionsService = async (
-    restaurantId: bigint,
+    restaurantId: number,
     cursor: number
 ): Promise<MissionListResponse> => {
     const missions = await repo.getAllRestaurantMissions(restaurantId, cursor);
