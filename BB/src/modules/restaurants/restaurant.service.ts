@@ -8,44 +8,25 @@ export const createReviewService = async (
 ): Promise<ReviewListResponse> => {
     const { userId } = data;
 
-    if (!Number.isSafeInteger(userId) || userId <= 0) {
-        console.error("[createReviewService] userId is invalid", {
-            userId: data.userId
-        });
+    if (!userId || userId <= 0) {
         throw new Error("INVALID_USER_ID");
     }
 
-    if (!Number.isSafeInteger(restaurantId) || restaurantId <= 0) {
-        console.error("[createReviewService] restaurantId is invalid", {
-            restaurantId
-        });
+    if (!restaurantId || restaurantId <= 0) {
         throw new Error("INVALID_RESTAURANT_ID");
     }
 
     const restaurant = await repo.findRestaurant(restaurantId);
-    console.log("[createReviewService] restaurant lookup result", {
-        exists: !!restaurant,
-        restaurantId
-    });
     if (!restaurant) {
         throw new RestaurantNotFoundError(restaurantId);
     }
 
     const exist = await repo.findReview(userId, restaurantId);
-    console.log("[createReviewService] existing review lookup result", {
-        exists: !!exist,
-        userId: data.userId,
-        restaurantId
-    });
     if (exist) {
         throw new ReviewAlreadyExistsError({ userId: data.userId, restaurantId });
     }
 
     await repo.createReview(userId, restaurantId, data.content, data.star);
-    console.log("[createReviewService] review created", {
-        userId: data.userId,
-        restaurantId
-    });
 
     const reviews = await repo.getAllRestaurantReviews(restaurantId, 0);
     return responseFromReviews(reviews, 0);
