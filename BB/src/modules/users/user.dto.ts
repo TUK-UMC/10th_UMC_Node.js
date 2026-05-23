@@ -8,7 +8,7 @@ export interface UserSignUpRequest {
     birth: Date;
     address?: string;       // ?가 붙으면 '없을 수도 있음(선택)'이라는 뜻이에요!
     phone: string;
-    preferences: number[];
+    preferences: string[];
 }
 
 export interface UserSignUpResponse {
@@ -18,9 +18,34 @@ export interface UserSignUpResponse {
     birth: Date;
     address?: string;       // ?가 붙으면 '없을 수도 있음(선택)'이라는 뜻이에요!
     phone: string;
-    preferences: number[];
+    preferences: string[];
 }
 
+
+export interface ChallengeMissionRequest {
+    userId: bigint,
+    missionId: bigint
+}
+
+export interface ChallengeMissionResponse {
+    missionId: string;
+    status: string;
+}
+
+export interface MissionListResponse {
+    missionId: string;
+    restaurantId: string,
+    price: string,
+    point: string,
+}
+
+export interface ReviewListResponse {
+    reviewId: string;
+    restaurantId: string,
+}
+
+
+/*
 // 2. 요청받은 데이터를 우리 시스템에 맞는 데이터로 변환해주는 함수입니다. 
 export const bodyToUser = (body: UserSignUpRequest) => {
     const birth = new Date(body.birth); //날짜 변환
@@ -51,6 +76,7 @@ export const responseFromUser = (data: { user: any; preferences: any[] }): UserS
     }
 };
 
+*/
 export interface CreateMissionDto {
     name: string;
     price: number;
@@ -61,6 +87,7 @@ export interface ChallengeMissionDto {
     missionId: number;
 }
 
+/*
 export const responseFromReviews = (
     reviews: ReviewRow[],
     cursor: number
@@ -99,6 +126,8 @@ export const responseFromMissions = (
         },
     };
 };
+
+*/
 
 export interface ReviewRow {
     id: bigint;
