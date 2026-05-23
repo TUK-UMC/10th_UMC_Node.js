@@ -15,8 +15,6 @@ export class UserController extends Controller {
     public async handleUserSignUp(
         @Body() body: UserSignUpRequest
     ): Promise<ApiResponse<UserSignUpResponse>> {
-        console.log("회원가입을 요청했습니다!");
-        console.log("body:", body); // 값이 잘 들어오나 확인하기 위한 테스트용
         const user = await userSignUp(body);
         return success(user);
     }

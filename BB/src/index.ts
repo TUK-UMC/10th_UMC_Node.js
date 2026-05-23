@@ -68,22 +68,6 @@ app.get("/", (req: Request, res: Response) => {
     res.send("Hello World! This is TypeScript Server!");
 });
 
-// Restaurant API
-// // 미션 생성
-app.post(
-    "/api/v1/restaurants/:restaurantId/missions",
-    createMission
-);
-// 가게의 리뷰 조회
-app.get("/api/v1/restaurants/:restaurantId/reviews", listRestaurantReviews);
-// 가게의 미션 조회
-app.get("/api/v1/restaurants/:restaurantId/missions", listRestaurantMissions);
-// 리뷰쓰기
-app.post(
-    "/api/v1/restaurants/:restaurantId/reviews",
-    createReview
-);
-
 // 4. 서버 시작
 app.listen(port, () => {
     console.log(`[server]: Server is running at <http://localhost>:${port}`);

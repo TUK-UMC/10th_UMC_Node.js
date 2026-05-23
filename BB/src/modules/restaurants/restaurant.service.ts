@@ -31,13 +31,14 @@ export const createReviewService = async (
         throw new RestaurantNotFoundError("존재하지 않는 식당입니다.", { restaurantId });
     }
 
-    const exist = await repo.findReview(userId);
+    const exist = await repo.findReview(userId, restaurantId);
     console.log("[createReviewService] existing review lookup result", {
         exists: !!exist,
-        userId: data.userId
+        userId: data.userId,
+        restaurantId
     });
     if (exist) {
-        throw new ReviewAlreadyExistsError("이미 작성한 리뷰가 있습니다.", { userId: data.userId });
+        throw new ReviewAlreadyExistsError("이미 작성한 리뷰가 있습니다.", { userId: data.userId, restaurantId });
     }
 
     await repo.createReview(userId, restaurantId, data.content, data.star);

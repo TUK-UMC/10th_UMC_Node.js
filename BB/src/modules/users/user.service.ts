@@ -33,9 +33,7 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
         throw new DuplicateUserEmailError("이미 존재하는 이메일입니다.", data);
     }
 
-    for (const preference of data.preferences) {
-        await setPreference(joinUserId, preference);
-    }
+    await setPreference(joinUserId, data.preferences);
 
     const user = await getUser(joinUserId);
     if (!user) {

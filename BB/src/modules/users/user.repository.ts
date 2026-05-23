@@ -1,6 +1,15 @@
 import { prisma } from "../../db.config.js";
 
-export const addUser = async (data: any) => {
+interface AddUserRequest {
+    email: string;
+    name: string;
+    gender: string;
+    birth: Date;
+    address?: string;
+    phone: string;
+}
+
+export const addUser = async (data: AddUserRequest) => {
     const user = await prisma.user.findFirst({ where: { email: data.email } });
 
     if (user) {
@@ -24,15 +33,24 @@ export const addUser = async (data: any) => {
 export const getUser = async (userId: number) => {
     return await prisma.user.findUnique({
         where: { id: userId },
+        select: {
+            id: true,
+            email: true,
+            name: true,
+            gender: true,
+            birth: true,
+            address: true,
+            phone: true,
+        }
     });
 };
 
-export const setPreference = async (userId: number, categoryId: number) => {
-    await prisma.userPreference.create({
-        data: {
+export const setPreference = async (userId: number, preferences: number[]) => {
+    await prisma.userPreference.createMany({
+        data: preferences.map(categoryId => ({
             userId,
-            categoryId,
-        },
+            categoryId
+        })),
     });
 };
 
@@ -49,6 +67,10 @@ export const getUserPreferencesByUserId = async (userId: number) => {
 export const findMission = async (missionId: number) => {
     return await prisma.mission.findUnique({
         where: { id: missionId },
+        select: {
+            id: true,
+            restaurantId: true,
+        }
     });
 };
 
@@ -59,6 +81,9 @@ export const findOngoingMission = async (userId: number, missionId: number) => {
             missionId,
             isCompleted: false,
         },
+        select: {
+            id: true,
+        }
     });
 };
 

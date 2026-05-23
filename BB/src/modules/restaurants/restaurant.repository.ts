@@ -3,12 +3,19 @@ import { prisma } from "../../db.config.js";
 export const findMission = async (missionId: number) => {
     return await prisma.mission.findUnique({
         where: { id: missionId },
+        select: {
+            id: true,
+            restaurantId: true,
+        }
     });
 };
 
-export const findReview = async (userId: number) => {
+export const findReview = async (userId: number, restaurantId: number) => {
     return await prisma.review.findFirst({
-        where: { userId },
+        where: { userId, restaurantId },
+        select: {
+            id: true,
+        }
     });
 };
 
@@ -56,6 +63,9 @@ export const createMission = async (
 export const findRestaurant = async (restaurantId: number) => {
     return await prisma.restaurant.findUnique({
         where: { id: restaurantId },
+        select: {
+            id: true,
+        }
     });
 };
 
