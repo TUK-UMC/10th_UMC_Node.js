@@ -1,13 +1,10 @@
-import { Request as ExpressRequest, Response, NextFunction } from "express";
-import { Query, Body, Controller, Get, Path, Post, Route, Tags } from "tsoa";
-import { StatusCodes } from "http-status-codes";
+import { Response, SuccessResponse, Query, Body, Controller, Get, Path, Post, Route, Tags } from "tsoa";
 import {
     createMissionService,
     createReviewService,
     listRestaurantMissionsService,
     listRestaurantReviewsService,
 } from "./restaurant.service.js";
-import { parseId } from "../../utils/parse.js";
 import { CreateReviewDto, MissionListResponse, ReviewListResponse } from "./restaurant.dto.js";
 import { ApiResponse, success } from "../../common/responses/response.js";
 
@@ -20,7 +17,13 @@ interface CreateMissionDto {
 @Route("restaurants")
 @Tags("Restaurants")
 export class RestaurantController extends Controller {
+    /**
+    * 리뷰 작성 API
+    * @summary 사용자가 음식점에 리뷰를 작성하는 엔드포인트입니다.
+    */
     @Post("{restaurantId}/reviews")
+    @SuccessResponse(201, "리뷰 작성 성공")
+    @Response<ApiResponse<null>>(409, "이미 작성된 리뷰 에러")
     public async createReview(
         @Path() restaurantId: number,
         @Body() body: CreateReviewDto
@@ -31,6 +34,7 @@ export class RestaurantController extends Controller {
     }
 
     @Post("{restaurantId}/missions")
+    @SuccessResponse(201, "미션 생성 성공")
     public async createMission(
         @Path() restaurantId: number,
         @Body() body: CreateMissionDto
@@ -54,6 +58,7 @@ export class RestaurantController extends Controller {
     }
 
     @Get("{restaurantId}/reviews")
+    @SuccessResponse(200, "리뷰 목록 조회 성공")
     public async listRestaurantReviews(
         @Path() restaurantId: number,
         @Query() cursor: number = 0
@@ -64,6 +69,7 @@ export class RestaurantController extends Controller {
     }
 
     @Get("{restaurantId}/missions")
+    @SuccessResponse(200, "미션 목록 조회 성공")
     public async listRestaurantMissions(
         @Path() restaurantId: number,
         @Query() cursor: number = 0

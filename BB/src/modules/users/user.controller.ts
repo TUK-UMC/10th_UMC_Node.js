@@ -1,5 +1,5 @@
 import { Request as ExpressRequest, Response as ExpressResponse, NextFunction } from "express";
-import { Body, Controller, Post, Route, Tags, Path, Get, Query, Request, Middlewares, Res, Response } from "tsoa";
+import { Body, Controller, Post, Route, Tags, Path, Get, Query, Request, Middlewares, Res, Response, SuccessResponse } from "tsoa";
 import { StatusCodes } from "http-status-codes";
 import { UserSignUpRequest, UserSignUpResponse, ChallengeMissionRequest, ChallengeMissionResponse, UserMissionListResponse, UserReviewListResponse } from "./user.dto.js";
 import { userSignUp, challengeMissionService, listUserReviewsService, listUserMissionsService } from "./user.service.js";
@@ -8,8 +8,12 @@ import { ApiResponse, success } from "../../common/responses/response.js";
 @Route("users")
 @Tags("Users")
 export class UserController extends Controller {
+    /**
+    * 회원가입 API
+    * @summary 회원가입을 처리하는 엔드포인트입니다.
+    */
     @Post("signup")
-    @Response<ApiResponse<UserSignUpResponse>>(200, "회원가입 성공")
+    @SuccessResponse(201, "회원가입 성공")
     @Response<ApiResponse<null>>(400, "중복된 이메일 에러")
     public async handleUserSignUp(
         @Body() body: UserSignUpRequest
@@ -18,8 +22,14 @@ export class UserController extends Controller {
         return success(user);
     }
 
-    // 미션 도전
+    /**
+   * 미션 도전 API
+   * @summary 유저가 미션을 도전하는 엔드포인트입니다.
+   */
     @Post("{userId}/missions/challenge")
+    @SuccessResponse(201, "유저 미션 도전 성공")
+    @Response<null>(404, "USER_OR_MISSION_OR_RESTAURANT_NOT_EXIST")
+    @Response<null>(409, "MISSION_ALREADY_ONGOING")
     public async challengeMission(
         @Path() userId: number,
         @Body() body: ChallengeMissionRequest
@@ -34,8 +44,12 @@ export class UserController extends Controller {
     }
 
 
-    // 진행 중인 미션 목록 조회
+    /**
+   * 미션조회 API
+   * @summary 유저의 미션 목록을 조회하는 엔드포인트입니다.
+   */
     @Get("{userId}/missions")
+    @SuccessResponse(200, "유저의 미션 목록 조회 성공")
     public async listUserMissions(
         @Path() userId: number,
         @Query() cursor: number = 0
@@ -50,8 +64,12 @@ export class UserController extends Controller {
         return success(missions);
     }
 
-    // 내가 작성한 리뷰 목록 조회
+    /**
+   * 리뷰 조회 API
+   * @summary 유저가 작성한 리뷰 목록을 조회하는 엔드포인트입니다.
+   */
     @Get("{userId}/reviews")
+    @SuccessResponse(200, "유저의 리뷰 목록 조회 성공")
     public async listUserReviews(
         @Path() userId: number,
         @Query() cursor: number = 0
@@ -66,81 +84,3 @@ export class UserController extends Controller {
         return success(reviews);
     }
 }
-
-/*
-export const challengeMission = async (req: Request, res: Response) => {
-    try {
-        const userId = parseId(req.params.userId);
-        const missionId = Number(req.body.missionId);
-
-        const result = await challengeMissionService(userId, missionId);
-
-        return res.json({
-            success: true,
-            code: "S200",
-            message: "미션 도전 요청 성공",
-            data: [{
-                ...result,
-                missionId: result.missionId,
-            }]
-        });
-
-    } catch (err: any) {
-        if (err.message === "MISSION_ALREADY_ONGOING") {
-            return res.status(400).json({
-                success: false,
-                code: "MISSION_ALREADY_ONGOING",
-                message: "이미 미션을 등록했습니다.",
-                data: null
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            code: "E500",
-            message: `서버 에러: ${err.message}`,
-            data: null
-        });
-    }
-};
-
-export const listUserMissions = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const userId = parseId(req.params.userId);
-        const cursor =
-            typeof req.query.cursor === "string"
-                ? parseInt(req.query.cursor, 10)
-                : 0;
-
-        const missions = await listUserMissionsService(userId, cursor);
-
-        res.status(StatusCodes.OK).json(missions);
-    } catch (err) {
-        next(err);
-    }
-};
-
-export const listUserReviews = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const userId = parseId(req.params.userId);
-        const cursor =
-            typeof req.query.cursor === "string"
-                ? parseInt(req.query.cursor, 10)
-                : 0;
-
-        const reviews = await listUserReviewsService(userId, cursor);
-
-        res.status(StatusCodes.OK).json(reviews);
-    } catch (err) {
-        next(err);
-    }
-};
-*/

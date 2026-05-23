@@ -29,7 +29,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 // 2. 미들웨어 설정
-app.use(cors());            // cors 방식 허용                 
+app.use(cors({
+    origin: "http://localhost:5173",
+}));
 app.use(express.static('public'));    // 정적 파일 접근      
 app.use(express.json());              // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)     
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
@@ -38,6 +40,20 @@ app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형
 const router = express.Router();
 RegisterRoutes(router);
 app.use("/api/v1", router);
+
+// 1. TSOA가 생성한 swagger.json 읽어오기
+const swaggerFile = JSON.parse(
+    fs.readFileSync(path.resolve("dist/swagger.json"), "utf8")
+);
+
+// 2. Swagger UI 연결
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
+
+// 3. 서버 시작
+app.listen(port, () => {
+    console.log(`[server]: Server is running at <http://localhost>:${port}`);
+});
 
 // 전역 오류 처리 미들웨어
 app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
@@ -52,25 +68,7 @@ app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
     });
 });
 
-// 1. TSOA가 생성한 swagger.json 읽어오기
-const swaggerFile = JSON.parse(
-    fs.readFileSync(path.resolve("dist/swagger.json"), "utf8")
-);
 
-// 2. Swagger UI 연결
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
-
-// ---------------------------- tsoa 이전
-
-// 3. 기본 라우트
-app.get("/", (req: Request, res: Response) => {
-    res.send("Hello World! This is TypeScript Server!");
-});
-
-// 4. 서버 시작
-app.listen(port, () => {
-    console.log(`[server]: Server is running at <http://localhost>:${port}`);
-});
 
 // 쿠키 만드는 라우터 
 app.get('/setcookie', (req, res) => {
