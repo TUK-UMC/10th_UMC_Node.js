@@ -7,10 +7,21 @@ datasource db {
   provider = "mysql"
 }
 
+enum AlarmType {
+  MISSION
+  REVIEW
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NONE
+}
+
 model User {
   id               Int       @id @default(autoincrement()) @map("user_id")
   name             String?   @db.VarChar(50)
-  gender           String?   @db.VarChar(10)
+  gender           Gender?   @map("gender")
   birth            DateTime? @db.Date
   address          String?   @db.VarChar(255)
   email            String?   @db.VarChar(100)
@@ -27,14 +38,12 @@ model User {
   preferences      UserPreference[]
   completes        Complete[]
   reviews          Review[]
-  reviewImages     ReviewImage[]
   alarms           Alarm[]
   alarmSettings    UserAlarmSetting[]
   inquiries        Inquiry[]
-  inquiryImages    InquiryImage[]
   answers          Answer[]
 
-  @@map("User")
+  @@map("user")
 }
 
 model FoodCategory {
@@ -45,7 +54,7 @@ model FoodCategory {
 
   preferences UserPreference[]
 
-  @@map("FoodCategory")
+  @@map("foodcategory")
 }
 
 model UserPreference {
@@ -58,7 +67,7 @@ model UserPreference {
   category    FoodCategory @relation(fields: [categoryId], references: [id])
   user        User         @relation(fields: [userId], references: [id])
 
-  @@map("UserPreference")
+  @@map("userpreference")
 }
 
 model Restaurant {
@@ -73,9 +82,8 @@ model Restaurant {
   missions     Mission[]
   completes    Complete[]
   reviews      Review[]
-  reviewImages ReviewImage[]
 
-  @@map("Restaurant")
+  @@map("restaurant")
 }
 
 model RestaurantImage {
@@ -85,7 +93,7 @@ model RestaurantImage {
 
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
 
-  @@map("RestaurantImage")
+  @@map("restaurantimage")
 }
 
 model Mission {
@@ -100,7 +108,7 @@ model Mission {
   restaurant   Restaurant? @relation(fields: [restaurantId], references: [id])
   completes    Complete[]
 
-  @@map("Mission")
+  @@map("mission")
 }
 
 model Complete {
@@ -115,7 +123,7 @@ model Complete {
   mission      Mission    @relation(fields: [missionId], references: [id])
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
 
-  @@map("Complete")
+  @@map("complete")
 }
 
 model Review {
@@ -132,21 +140,17 @@ model Review {
 
   images       ReviewImage[]
 
-  @@map("Review")
+  @@map("review")
 }
 
 model ReviewImage {
   id           Int      @id @default(autoincrement()) @map("review_image_id")
-  reviewId     Int      @map("review_id")
-  restaurantId Int      @map("restaurant_id")
-  userId       Int      @map("user_id")
+  reviewId       Int      @map("review_id")
   imageUrl     String?  @db.VarChar(255) @map("image_url")
 
   review       Review     @relation(fields: [reviewId], references: [id])
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
-  user         User       @relation(fields: [userId], references: [id])
 
-  @@map("ReviewImage")
+  @@map("reviewimage")
 }
 
 model Alarm {
@@ -162,7 +166,7 @@ model Alarm {
 
   user         User @relation(fields: [userId], references: [id])
 
-  @@map("Alarm")
+  @@map("alarm")
 }
 
 model UserAlarmSetting {
@@ -173,7 +177,7 @@ model UserAlarmSetting {
 
   user         User @relation(fields: [userId], references: [id])
 
-  @@map("UserAlarmSetting")
+  @@map("useralarmsetting")
 }
 
 model Inquiry {
@@ -189,19 +193,17 @@ model Inquiry {
   images       InquiryImage[]
   answers      Answer[]
 
-  @@map("Inquiry")
+  @@map("inquiry")
 }
 
 model InquiryImage {
   id           Int      @id @default(autoincrement()) @map("inquiry_image_id")
   inquiryId    Int      @map("inquiry_id")
-  userId       Int      @map("user_id")
   imageUrl     String?  @db.VarChar(255) @map("image_url")
 
   inquiry      Inquiry @relation(fields: [inquiryId], references: [id])
-  user         User    @relation(fields: [userId], references: [id])
 
-  @@map("InquiryImage")
+  @@map("inquiryimage")
 }
 
 model Answer {
@@ -214,10 +216,5 @@ model Answer {
   inquiry      Inquiry @relation(fields: [inquiryId], references: [id])
   user         User    @relation(fields: [userId], references: [id])
 
-  @@map("Answer")
-}
-
-enum AlarmType {
-  MISSION
-  REVIEW
+  @@map("answer")
 }

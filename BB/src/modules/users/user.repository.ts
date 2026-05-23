@@ -1,4 +1,6 @@
 import { prisma } from "../../db.config.js";
+import { Gender } from "../../generated/prisma/enums.js";
+import type { Gender as GenderType } from "../../generated/prisma/enums.js";
 
 interface AddUserRequest {
     email: string;
@@ -9,11 +11,19 @@ interface AddUserRequest {
     phone: string;
 }
 
+const isGender = (gender: string): gender is GenderType => {
+    return Object.values(Gender).includes(gender as GenderType);
+};
+
 export const addUser = async (data: AddUserRequest) => {
     const user = await prisma.user.findFirst({ where: { email: data.email } });
 
     if (user) {
         return null;
+    }
+
+    if (!isGender(data.gender)) {
+        throw new Error("INVALID_GENDER");
     }
 
     const created = await prisma.user.create({
