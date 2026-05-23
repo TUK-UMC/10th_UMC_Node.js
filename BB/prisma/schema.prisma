@@ -54,7 +54,7 @@ model FoodCategory {
 
   preferences UserPreference[]
 
-  @@map("foodcategory")
+  @@map("food_category")
 }
 
 model UserPreference {
@@ -67,7 +67,7 @@ model UserPreference {
   category    FoodCategory @relation(fields: [categoryId], references: [id])
   user        User         @relation(fields: [userId], references: [id])
 
-  @@map("userpreference")
+  @@map("user_preference")
 }
 
 model Restaurant {
@@ -93,7 +93,7 @@ model RestaurantImage {
 
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
 
-  @@map("restaurantimage")
+  @@map("restaurant_image")
 }
 
 model Mission {
@@ -150,7 +150,7 @@ model ReviewImage {
 
   review       Review     @relation(fields: [reviewId], references: [id])
 
-  @@map("reviewimage")
+  @@map("review_image")
 }
 
 model Alarm {
@@ -177,7 +177,7 @@ model UserAlarmSetting {
 
   user         User @relation(fields: [userId], references: [id])
 
-  @@map("useralarmsetting")
+  @@map("user_alarm_setting")
 }
 
 model Inquiry {
@@ -203,7 +203,7 @@ model InquiryImage {
 
   inquiry      Inquiry @relation(fields: [inquiryId], references: [id])
 
-  @@map("inquiryimage")
+  @@map("inquiry_image")
 }
 
 model Answer {
