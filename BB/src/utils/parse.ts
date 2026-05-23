@@ -1,9 +1,15 @@
-export const parseBigInt = (
+export const parseId = (
     value: string | string[] | undefined
-): bigint => {
+): number => {
     if (!value || Array.isArray(value)) {
         throw new Error("INVALID_ID");
     }
 
-    return BigInt(value);
+    const id = Number(value);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+        throw new Error("INVALID_ID");
+    }
+
+    return id;
 };

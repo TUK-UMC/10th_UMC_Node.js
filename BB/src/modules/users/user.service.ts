@@ -30,12 +30,10 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
     });
 
     if (joinUserId === null) {
-        throw new DuplicateUserEmailError("이미 존재하는 이메일입니다.", data);
+        throw new DuplicateUserEmailError(data.email);
     }
 
-    for (const preference of data.preferences) {
-        await setPreference(joinUserId, BigInt(preference));
-    }
+    await setPreference(joinUserId, data.preferences);
 
     const user = await getUser(joinUserId);
     if (!user) {
@@ -47,7 +45,7 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
         .filter((name): name is string => name !== null);
 
     return {
-        userId: user.id.toString(),
+        userId: user.id,
         preferences,
         name: user.name ?? "",
         email: user.email ?? "",
@@ -59,10 +57,10 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
 };
 
 export const challengeMissionService = async (
+    userId: number,
     data: ChallengeMissionRequest
 ): Promise<ChallengeMissionResponse> => {
-    const userId = BigInt(data.userId);
-    const missionId = BigInt(data.missionId);
+    const { missionId } = data;
 
     const user = await getUser(userId);
     if (!user) {
@@ -79,28 +77,28 @@ export const challengeMissionService = async (
 
     const exist = await findOngoingMission(userId, missionId);
     if (exist) {
-        throw new MissionAlreadyOngoingError("이미 진행 중인 미션입니다.", data);
+        throw new MissionAlreadyOngoingError(data);
     }
 
     await insertChallenge(userId, missionId, mission.restaurantId);
 
     return {
-        missionId: missionId.toString(),
+        missionId,
         status: "ONGOING",
     };
 };
 
 export const listUserReviewsService = async (
-    userId: bigint,
+    userId: number,
     cursor: number
 ): Promise<UserReviewListResponse> => {
     const reviews = await getAllUserReviews(userId, cursor);
 
     return {
         data: reviews.map((review) => ({
-            id: review.id.toString(),
-            userId: review.userId.toString(),
-            restaurantId: review.restaurantId?.toString() || null,
+            id: review.id,
+            userId: review.userId,
+            restaurantId: review.restaurantId,
             content: review.content,
             star: review.star?.toString() || null,
         })),
@@ -111,15 +109,15 @@ export const listUserReviewsService = async (
 };
 
 export const listUserMissionsService = async (
-    userId: bigint,
+    userId: number,
     cursor: number
 ): Promise<UserMissionListResponse> => {
     const missions = await getAllUserMissions(userId, cursor);
 
     return {
         data: missions.map((mission) => ({
-            id: mission.id.toString(),
-            restaurantId: mission.restaurantId?.toString() || null,
+            id: mission.id,
+            restaurantId: mission.restaurantId,
             price: mission.price,
             point: mission.point,
         })),

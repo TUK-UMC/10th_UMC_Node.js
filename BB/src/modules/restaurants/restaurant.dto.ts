@@ -1,21 +1,21 @@
 export interface CreateReviewDto {
-    userId: string;
+    userId: number;
     content: string;
     star: number;
 }
 
 export interface ReviewRow {
-    id: bigint;
-    userId: bigint;
-    restaurantId: bigint | null;
+    id: number;
+    userId: number;
+    restaurantId: number | null;
     content: string | null;
     star: { toString(): string } | null;
 }
 
 export interface ReviewItem {
-    id: string;
-    userId: string;
-    restaurantId: string | null;
+    id: number;
+    userId: number;
+    restaurantId: number | null;
     content: string | null;
     star: string | null;
 }
@@ -28,15 +28,15 @@ export interface ReviewListResponse {
 }
 
 export interface MissionRow {
-    id: bigint;
-    restaurantId: bigint | null;
+    id: number;
+    restaurantId: number | null;
     price: number | null;
     point: number | null;
 }
 
 export interface MissionItem {
-    id: string;
-    restaurantId: string | null;
+    id: number;
+    restaurantId: number | null;
     price: number | null;
     point: number | null;
 }
@@ -60,9 +60,9 @@ export const responseFromReviews = (
     return {
         data: reviews.map((review) => ({
             ...review,
-            id: review.id.toString(),
-            restaurantId: review.restaurantId?.toString() || null,
-            userId: review.userId.toString(),
+            id: review.id,
+            restaurantId: review.restaurantId,
+            userId: review.userId,
             content: review.content,
             star: review.star?.toString() || null,
         })),
@@ -86,8 +86,8 @@ export const responseFromMissions = (
     return {
         data: missions.map((mission) => ({
             ...mission,
-            id: mission.id.toString(),
-            restaurantId: mission.restaurantId?.toString() || null,
+            id: mission.id,
+            restaurantId: mission.restaurantId,
             price: mission.price,
             point: mission.point,
         })),

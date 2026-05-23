@@ -12,11 +12,11 @@ export interface UserSignUpRequest {
     /** 유저 전화번호 */
     phone: string;
     /** 선호 카테고리 ID 배열 (예: [1, 2]) */
-    preferences: string[];
+    preferences: number[];
 }
 
 export interface UserSignUpResponse {
-    userId: string;
+    userId: number;
     email: string;
     name: string;
     gender: string;
@@ -27,12 +27,11 @@ export interface UserSignUpResponse {
 }
 
 export interface ChallengeMissionRequest {
-    userId: string;
-    missionId: string;
+    missionId: number;
 }
 
 export interface ChallengeMissionResponse {
-    missionId: string;
+    missionId: number;
     status: string;
 }
 
@@ -47,17 +46,17 @@ export interface ChallengeMissionDto {
 }
 
 export interface UserReviewRow {
-    id: bigint;
-    userId: bigint;
-    restaurantId: bigint | null;
+    id: number;
+    userId: number;
+    restaurantId: number | null;
     content: string | null;
     star: { toString(): string } | null;
 }
 
 export interface UserReviewItem {
-    id: string;
-    userId: string;
-    restaurantId: string | null;
+    id: number;
+    userId: number;
+    restaurantId: number | null;
     content: string | null;
     star: string | null;
 }
@@ -70,15 +69,15 @@ export interface UserReviewListResponse {
 }
 
 export interface UserMissionRow {
-    id: bigint;
-    restaurantId: bigint | null;
+    id: number;
+    restaurantId: number | null;
     price: number | null;
     point: number | null;
 }
 
 export interface UserMissionItem {
-    id: string;
-    restaurantId: string | null;
+    id: number;
+    restaurantId: number | null;
     price: number | null;
     point: number | null;
 }

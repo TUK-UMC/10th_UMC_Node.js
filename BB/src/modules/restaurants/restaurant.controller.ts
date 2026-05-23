@@ -1,5 +1,5 @@
 import { Request as ExpressRequest, Response, NextFunction } from "express";
-import { Body, Controller, Path, Post, Route, Tags } from "tsoa";
+import { Query, Body, Controller, Get, Path, Post, Route, Tags } from "tsoa";
 import { StatusCodes } from "http-status-codes";
 import {
     createMissionService,
@@ -7,7 +7,7 @@ import {
     listRestaurantMissionsService,
     listRestaurantReviewsService,
 } from "./restaurant.service.js";
-import { parseBigInt } from "../../utils/parse.js";
+import { parseId } from "../../utils/parse.js";
 import { CreateReviewDto, MissionListResponse, ReviewListResponse } from "./restaurant.dto.js";
 import { ApiResponse, success } from "../../common/responses/response.js";
 
@@ -22,23 +22,21 @@ interface CreateMissionDto {
 export class RestaurantController extends Controller {
     @Post("{restaurantId}/reviews")
     public async createReview(
-        @Path() restaurantId: string,
+        @Path() restaurantId: number,
         @Body() body: CreateReviewDto
     ): Promise<ApiResponse<ReviewListResponse>> {
-        const parsedRestaurantId = parseBigInt(restaurantId);
-        const result = await createReviewService(parsedRestaurantId, body);
+        const result = await createReviewService(restaurantId, body);
 
         return success(result);
     }
 
     @Post("{restaurantId}/missions")
     public async createMission(
-        @Path() restaurantId: string,
+        @Path() restaurantId: number,
         @Body() body: CreateMissionDto
     ): Promise<ApiResponse<MissionListResponse>> {
-        const parsedRestaurantId = parseBigInt(restaurantId);
         const result = await createMissionService(
-            parsedRestaurantId,
+            restaurantId,
             body.name,
             body.price,
             body.point
@@ -46,88 +44,32 @@ export class RestaurantController extends Controller {
 
         return success({
             data: [{
-                id: result.missionId.toString(),
-                restaurantId: result.restaurantId.toString(),
+                id: result.missionId,
+                restaurantId: result.restaurantId,
                 price: result.price,
                 point: result.point,
             }],
             pagination: { cursor: null },
         });
     }
-}
 
-export const listRestaurantReviews = async (
-    req: ExpressRequest,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const cursor = typeof req.query.cursor === "string"
-            ? parseInt(req.query.cursor, 10)
-            : 0;
-
+    @Get("{restaurantId}/reviews")
+    public async listRestaurantReviews(
+        @Path() restaurantId: number,
+        @Query() cursor: number = 0
+    ): Promise<ApiResponse<ReviewListResponse>> {
         const reviews = await listRestaurantReviewsService(restaurantId, cursor);
 
-        res.status(StatusCodes.OK).json(reviews);
-    } catch (err) {
-        next(err);
+        return success(reviews);
     }
-};
 
-export const listRestaurantMissions = async (
-    req: ExpressRequest,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const cursor = typeof req.query.cursor === "string"
-            ? parseInt(req.query.cursor, 10)
-            : 0;
-
+    @Get("{restaurantId}/missions")
+    public async listRestaurantMissions(
+        @Path() restaurantId: number,
+        @Query() cursor: number = 0
+    ): Promise<ApiResponse<MissionListResponse>> {
         const missions = await listRestaurantMissionsService(restaurantId, cursor);
 
-        res.status(StatusCodes.OK).json(missions);
-    } catch (err) {
-        next(err);
+        return success(missions);
     }
-};
-
-export const createReview = async (
-    req: ExpressRequest,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const result = await createReviewService(restaurantId, req.body);
-        res.status(StatusCodes.OK).json(success(result));
-    } catch (err) {
-        next(err);
-    }
-};
-
-export const createMission = async (
-    req: ExpressRequest,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const { name, price, point } = req.body as CreateMissionDto;
-        const result = await createMissionService(restaurantId, name, price, point);
-
-        res.status(StatusCodes.OK).json(success({
-            data: [{
-                id: result.missionId.toString(),
-                restaurantId: result.restaurantId.toString(),
-                price: result.price,
-                point: result.point,
-            }],
-            pagination: { cursor: null },
-        }));
-    } catch (err) {
-        next(err);
-    }
-};
+}

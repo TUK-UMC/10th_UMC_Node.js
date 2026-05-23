@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { createReview, createMission, listRestaurantReviews, listRestaurantMissions } from "./modules/restaurants/restaurant.controller.js";
 import { RegisterRoutes } from "./generated/routes.js";
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
@@ -67,22 +66,6 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 app.get("/", (req: Request, res: Response) => {
     res.send("Hello World! This is TypeScript Server!");
 });
-
-// Restaurant API
-// // 미션 생성
-app.post(
-    "/api/v1/restaurants/:restaurantId/missions",
-    createMission
-);
-// 가게의 리뷰 조회
-app.get("/api/v1/restaurants/:restaurantId/reviews", listRestaurantReviews);
-// 가게의 미션 조회
-app.get("/api/v1/restaurants/:restaurantId/missions", listRestaurantMissions);
-// 리뷰쓰기
-app.post(
-    "/api/v1/restaurants/:restaurantId/reviews",
-    createReview
-);
 
 // 4. 서버 시작
 app.listen(port, () => {
