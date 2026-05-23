@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
-import { createReview, createMission, listRestaurantReviews, listRestaurantMissions } from "./modules/restaurants/restaurant.controller.js";
 import { RegisterRoutes } from "./generated/routes.js";
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';

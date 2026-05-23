@@ -27,7 +27,6 @@ export interface UserSignUpResponse {
 }
 
 export interface ChallengeMissionRequest {
-    userId: number;
     missionId: number;
 }
 

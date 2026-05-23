@@ -28,7 +28,7 @@ export const createReviewService = async (
         restaurantId
     });
     if (!restaurant) {
-        throw new RestaurantNotFoundError("존재하지 않는 식당입니다.", { restaurantId });
+        throw new RestaurantNotFoundError(restaurantId);
     }
 
     const exist = await repo.findReview(userId, restaurantId);
@@ -38,7 +38,7 @@ export const createReviewService = async (
         restaurantId
     });
     if (exist) {
-        throw new ReviewAlreadyExistsError("이미 작성한 리뷰가 있습니다.", { userId: data.userId, restaurantId });
+        throw new ReviewAlreadyExistsError({ userId: data.userId, restaurantId });
     }
 
     await repo.createReview(userId, restaurantId, data.content, data.star);

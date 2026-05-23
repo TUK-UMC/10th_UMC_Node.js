@@ -30,7 +30,7 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
     });
 
     if (joinUserId === null) {
-        throw new DuplicateUserEmailError("이미 존재하는 이메일입니다.", data);
+        throw new DuplicateUserEmailError(data.email);
     }
 
     await setPreference(joinUserId, data.preferences);
@@ -57,9 +57,10 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
 };
 
 export const challengeMissionService = async (
+    userId: number,
     data: ChallengeMissionRequest
 ): Promise<ChallengeMissionResponse> => {
-    const { userId, missionId } = data;
+    const { missionId } = data;
 
     const user = await getUser(userId);
     if (!user) {
@@ -76,7 +77,7 @@ export const challengeMissionService = async (
 
     const exist = await findOngoingMission(userId, missionId);
     if (exist) {
-        throw new MissionAlreadyOngoingError("이미 진행 중인 미션입니다.", data);
+        throw new MissionAlreadyOngoingError(data);
     }
 
     await insertChallenge(userId, missionId, mission.restaurantId);

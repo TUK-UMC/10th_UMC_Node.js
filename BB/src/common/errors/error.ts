@@ -1,29 +1,10 @@
 import { AppError } from "./app.error.js";
 
-export class DuplicateUserEmailError extends AppError {
-    constructor(message: string, data?: unknown) {
+// 1. 공통 에러
+export class BadRequestException extends AppError {
+    constructor(message: string, data: unknown = null) {
         super({
-            errorCode: "DUPLICATE_USER_EMAIL",
-            statusCode: 409,
-            message,
-            data,
-        });
-    }
-}
-export class InvalidCredentialsError extends AppError {
-    constructor(message: string, data?: unknown) {
-        super({
-            errorCode: "INVALID_CREDENTIALS",
-            statusCode: 401,
-            message,
-            data,
-        });
-    }
-}
-export class MissionAlreadyOngoingError extends AppError {
-    constructor(message: string, data?: unknown) {
-        super({
-            errorCode: "MISSION_ALREADY_ONGOING",
+            errorCode: "BAD_REQUEST",
             statusCode: 400,
             message,
             data,
@@ -31,10 +12,21 @@ export class MissionAlreadyOngoingError extends AppError {
     }
 }
 
-export class RestaurantNotFoundError extends AppError {
-    constructor(message: string, data?: unknown) {
+export class UnauthorizedException extends AppError {
+    constructor(message: string, data: unknown = null) {
         super({
-            errorCode: "RESTAURANT_NOT_EXIST",
+            errorCode: "UNAUTHORIZED",
+            statusCode: 401,
+            message,
+            data,
+        });
+    }
+}
+
+export class NotFoundException extends AppError {
+    constructor(message: string, data: unknown = null) {
+        super({
+            errorCode: "NOT_FOUND",
             statusCode: 404,
             message,
             data,
@@ -42,13 +34,70 @@ export class RestaurantNotFoundError extends AppError {
     }
 }
 
-export class ReviewAlreadyExistsError extends AppError {
-    constructor(message: string, data?: unknown) {
+export class ConflictException extends AppError {
+    constructor(message: string, data: unknown = null) {
         super({
-            errorCode: "REVIEW_ALREADY_EXISTS",
+            errorCode: "CONFLICT",
             statusCode: 409,
             message,
             data,
         });
+    }
+}
+
+
+// 2. 도메인별 에러
+export class DuplicateUserEmailError
+    extends ConflictException {
+
+    constructor(data: unknown = null) {
+        super(
+            "이미 존재하는 이메일입니다.",
+            data
+        );
+    }
+}
+
+export class InvalidCredentialsError
+    extends UnauthorizedException {
+
+    constructor(data: unknown = null) {
+        super(
+            "이메일 또는 비밀번호가 올바르지 않습니다.",
+            data
+        );
+    }
+}
+
+export class MissionAlreadyOngoingError
+    extends BadRequestException {
+
+    constructor(data: unknown = null) {
+        super(
+            "이미 진행 중인 미션입니다.",
+            data
+        );
+    }
+}
+
+export class RestaurantNotFoundError
+    extends NotFoundException {
+
+    constructor(data: unknown = null) {
+        super(
+            "존재하지 않는 식당입니다.",
+            data
+        );
+    }
+}
+
+export class ReviewAlreadyExistsError
+    extends ConflictException {
+
+    constructor(data: unknown = null) {
+        super(
+            "이미 리뷰가 존재합니다.",
+            data
+        );
     }
 }
