@@ -1,6 +1,6 @@
 import { Body, Controller, Path, Post, Route, Tags } from "tsoa";
-import { type ChallengeMissionRequest, type ChallengeMissionResponse } from "../dtos/store.dto";
-import { startMissionChallenge } from "../services/store.service";
+import { type ChallengeMissionRequest, type ChallengeMissionResponse } from "../dtos/mission.dto";
+import { startMissionChallenge } from "../services/mission.service";
 import { type ApiResponse, success } from "../../../common/responses/response";
 
 @Route("missions")

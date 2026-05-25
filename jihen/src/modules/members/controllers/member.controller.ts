@@ -1,6 +1,6 @@
 import { Controller, Get, Path, Route, Tags } from "tsoa";
-import { type OngoingMissionItem } from "../dtos/store.dto";
-import { getMyOngoingMissions } from "../services/store.service";
+import { type OngoingMissionItem } from "../dtos/member.dto";
+import { getMyOngoingMissions } from "../services/member.service";
 import { type ApiResponse, success } from "../../../common/responses/response";
 
 @Route("members")

@@ -1,6 +1,6 @@
 import { Controller, Patch, Path, Route, Tags } from "tsoa";
-import { type CompleteMissionResponse } from "../dtos/store.dto";
-import { finishMission } from "../services/store.service";
+import { type CompleteMissionResponse } from "../dtos/member-mission.dto";
+import { finishMission } from "../services/member-mission.service";
 import { type ApiResponse, success } from "../../../common/responses/response";
 
 @Route("member-missions")

@@ -2,13 +2,11 @@ import { Body, Controller, Get, Path, Post, Query, Route, Tags } from "tsoa";
 import {
   type AddStoreRequest, type AddStoreResponse,
   type AddReviewRequest, type AddReviewResponse,
-  type AddMissionRequest, type AddMissionResponse,
-  type MissionItem, type ReviewsResponse,
+  type ReviewsResponse,
 } from "../dtos/store.dto";
-import {
-  createStore, createReview, createMission,
-  getStoreMissions, listStoreReviews,
-} from "../services/store.service";
+import { type AddMissionRequest, type AddMissionResponse, type MissionItem } from "../../missions/dtos/mission.dto";
+import { createStore, createReview, listStoreReviews } from "../services/store.service";
+import { createMission, getStoreMissions } from "../../missions/services/mission.service";
 import { type ApiResponse, success } from "../../../common/responses/response";
 
 @Route("stores")
