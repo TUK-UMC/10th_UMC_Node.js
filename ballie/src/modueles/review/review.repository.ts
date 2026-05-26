@@ -1,11 +1,16 @@
 import { prisma } from "../../db.config.js";
-import { ReviewCreateRequest } from "./review.dto.js";
 
-export const addReview = async (data: ReviewCreateRequest, restaurantId: number): Promise<number> => {
+export const addReview = async (data: {
+  userId: number;
+  restaurantId: number;
+  reviewTitle: string;
+  reviewContent: string;
+  score: number;
+}): Promise<number> => {
   const result = await prisma.review.create({
     data: {
       userId: BigInt(data.userId),
-      restaurantId: BigInt(restaurantId),
+      restaurantId: BigInt(data.restaurantId),
       reviewTitle: data.reviewTitle,
       reviewContent: data.reviewContent,
       score: data.score,

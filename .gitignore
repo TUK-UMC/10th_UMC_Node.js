@@ -153,3 +153,4 @@ dist
 
 ballie/ch04/src/generated/prisma
 ballie/src/generated/
+ballie/prisma/migrations/

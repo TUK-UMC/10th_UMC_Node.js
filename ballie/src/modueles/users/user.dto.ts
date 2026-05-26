@@ -2,23 +2,32 @@ import { Gender } from "../../generated/prisma/enums.js";
 
 export { Gender };
 
-/** 유저 생성 요청 body*/
-export interface UserSignUpRequest {
-    /** 이메일 */
-    email: string;
-    name: string;
-    /** 성벌 ex: MALE, FEMALE */
-    gender: Gender;
-    birth: string;
-    address: string;
-    phoneNumber: string;
-    password: string;
-    /**선호사항 카테고리ID*/
-    preferences: number[];
+/** 프로필 완성 요청 */
+export interface UpdateProfileRequest {
+  /** 성별: MALE | FEMALE */
+  gender: Gender;
+  /** 생년월일 ex: 2000-01-01 */
+  birth: string;
+  address: string;
+  phoneNumber: string;
+  /** 선호 카테고리 ID 목록 */
+  preferences: number[];
 }
-/** 유저 생성 응답*/
-export interface userSignUpResponse{
-    userId : number
-    /**유저 선호 카테고리 목록*/
-    preferences : String[]
+
+/** 프로필 완성 응답 */
+export interface UpdateProfileResponse {
+  userId: number;
+  preferences: string[];
+}
+
+/** 프로필 조회 응답 */
+export interface UserProfileResponse {
+  userId: number;
+  email: string | null;
+  name: string;
+  gender: string | null;
+  birth: string | null;
+  address: string | null;
+  phoneNumber: string | null;
+  preferences: string[];
 }

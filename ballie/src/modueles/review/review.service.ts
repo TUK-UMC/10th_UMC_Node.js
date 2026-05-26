@@ -3,20 +3,26 @@ import { addReview, getReview, getUserById, getRestaurantById, getReviewsByUserI
 import { AppError } from "../../common/error/app.error.js";
 import { RestaurantNotFoundError, ReviewCreateError, UserNotFoundError } from "../../common/error/error.js";
 
-export const reviewAdd = async (data: ReviewCreateRequest, restaurantId: number): Promise<ReviewCreateResponse> => {
+export const reviewAdd = async (userId: number, data: ReviewCreateRequest, restaurantId: number): Promise<ReviewCreateResponse> => {
     try {
         const restaurant = await getRestaurantById(restaurantId);
         if (!restaurant) {
             throw new RestaurantNotFoundError("존재하지 않는 식당입니다", data);
         }
 
-        const reviewId = await addReview(data, restaurantId);
+        const reviewId = await addReview({
+            userId,
+            restaurantId,
+            reviewTitle: data.reviewTitle,
+            reviewContent: data.reviewContent,
+            score: data.score,
+        });
         const review = await getReview(reviewId);
         if (!review) {
             throw new ReviewCreateError("리뷰 작성에 실패했습니다");
         }
 
-        const user = await getUserById(data.userId);
+        const user = await getUserById(userId);
 
         return {
             authorId: Number(user!.userId),

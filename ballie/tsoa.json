@@ -6,7 +6,14 @@
   "spec": {
     "outputDirectory": "dist",
     "specVersion": 3,
-    "basePath": "/api/v1"
+    "basePath": "/api/v1",
+    "securityDefinitions": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
   },
   "routes": {
     "routesDir": "src/generated"
