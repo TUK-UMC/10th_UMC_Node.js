@@ -1,14 +1,19 @@
 <<<<<<< feat/issue-30
 import "dotenv/config";
-import { PrismaClient } from "./generated/prisma/client.js";
+import { PrismaClient } from "./generated/prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
+const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
+if (!DB_HOST || !DB_USER || !DB_PASSWORD || !DB_NAME || !DB_PORT) {
+  throw new Error("필수 DB 환경변수(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT)가 설정되지 않았습니다.");
+}
+
 const adapter = new PrismaMariaDb({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB_NAME,
+  port: parseInt(DB_PORT, 10),
   connectionLimit: 10,
 });
 

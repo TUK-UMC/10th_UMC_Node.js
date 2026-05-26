@@ -1,7 +1,35 @@
-<<<<<<< feat/issue-30
-import { prisma } from "../../../db.config.js";
+import { prisma } from "../../../db.config";
 
-export const addUser = async (data: any): Promise<number | null> => {
+interface CreateUserData {
+  email: string;
+  password: string;
+  name: string;
+  gender: string;
+  birth: Date;
+  address: string;
+  detailAddress?: string;
+  phoneNumber: string;
+}
+
+interface UserRow {
+  id: number;
+  email: string;
+  name: string;
+  gender: string;
+  birth: Date;
+  address: string;
+  detailAddress: string | null;
+  phoneNumber: string;
+}
+
+interface UserPreferenceRow {
+  id: number;
+  userId: number | null;
+  foodCategoryId: number | null;
+  foodCategory: { id: number; name: string } | null;
+}
+
+export const addUser = async (data: CreateUserData): Promise<number | null> => {
   const user = await prisma.user.findFirst({ where: { email: data.email } });
   if (user) return null;
 
@@ -21,104 +49,28 @@ export const addUser = async (data: any): Promise<number | null> => {
   return created.id;
 };
 
-export const getUser = async (userId: number): Promise<any> => {
-  return await prisma.user.findFirstOrThrow({ where: { id: userId } });
+export const getUser = async (userId: number): Promise<UserRow> => {
+  return await prisma.user.findFirstOrThrow({
+    where: { id: userId },
+    select: { id: true, email: true, name: true, gender: true, birth: true, address: true, detailAddress: true, phoneNumber: true },
+  }) as UserRow;
 };
 
-export const setPreference = async (userId: number, foodCategoryId: number): Promise<void> => {
-  await prisma.userFavorCategory.create({
-    data: { userId, foodCategoryId },
+export const setPreferences = async (userId: number, foodCategoryIds: number[]): Promise<void> => {
+  await prisma.userFavorCategory.createMany({
+    data: foodCategoryIds.map((foodCategoryId) => ({ userId, foodCategoryId })),
   });
 };
 
-export const getUserPreferencesByUserId = async (userId: number): Promise<any[]> => {
+export const getUserPreferencesByUserId = async (userId: number): Promise<UserPreferenceRow[]> => {
   return await prisma.userFavorCategory.findMany({
     where: { userId },
-    include: { foodCategory: true },
+    select: {
+      id: true,
+      userId: true,
+      foodCategoryId: true,
+      foodCategory: { select: { id: true, name: true } },
+    },
     orderBy: { foodCategoryId: "asc" },
-  });
-=======
-import { type ResultSetHeader, type RowDataPacket } from "mysql2";
-import { pool } from "../../../db.config.js";
-
-export const addUser = async (data: any): Promise<number | null> => {
-  const conn = await pool.getConnection();
-
-  try {
-    const [confirm] = await pool.query<RowDataPacket[]>(
-      `SELECT EXISTS(SELECT 1 FROM user WHERE email = ?) as isExistEmail;`,
-      [data.email]
-    );
-
-    if (confirm[0]?.isExistEmail) {
-      return null;
-    }
-
-    const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO user (email, password, name, gender, birth, address, detail_address, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
-      [data.email, data.password, data.name, data.gender, data.birth, data.address, data.detailAddress, data.phoneNumber]
-    );
-
-    return result.insertId;
-  } catch (err) {
-    throw new Error(`오류가 발생했어요: ${err}`);
-  } finally {
-    conn.release();
-  }
-};
-
-export const getUser = async (userId: number): Promise<any | null> => {
-  const conn = await pool.getConnection();
-
-  try {
-    const [user] = await pool.query<RowDataPacket[]>(
-      `SELECT * FROM user WHERE id = ?;`,
-      [userId]
-    );
-
-    if (user.length === 0) {
-      return null;
-    }
-
-    return user[0];
-  } catch (err) {
-    throw new Error(`오류가 발생했어요: ${err}`);
-  } finally {
-    conn.release();
-  }
-};
-
-export const setPreference = async (userId: number, foodCategoryId: number): Promise<void> => {
-  const conn = await pool.getConnection();
-
-  try {
-    await pool.query(
-      `INSERT INTO user_favor_category (food_category_id, user_id) VALUES (?, ?);`,
-      [foodCategoryId, userId]
-    );
-  } catch (err) {
-    throw new Error(`오류가 발생했어요: ${err}`);
-  } finally {
-    conn.release();
-  }
-};
-
-export const getUserPreferencesByUserId = async (userId: number): Promise<any[]> => {
-  const conn = await pool.getConnection();
-
-  try {
-    const [preferences] = await pool.query<RowDataPacket[]>(
-      "SELECT ufc.id, ufc.food_category_id, ufc.user_id, fcl.name " +
-      "FROM user_favor_category ufc JOIN food_category fcl on ufc.food_category_id = fcl.id " +
-      "WHERE ufc.user_id = ? ORDER BY ufc.food_category_id ASC;",
-      [userId]
-    );
-
-    return preferences as any[];
-  } catch (err) {
-    throw new Error(`오류가 발생했어요: ${err}`);
-  } finally {
-    conn.release();
-  }
->>>>>>> develop
+  }) as UserPreferenceRow[];
 };
