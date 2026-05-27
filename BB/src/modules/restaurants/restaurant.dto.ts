@@ -1,25 +1,23 @@
-import { Decimal } from "@prisma/client/runtime/client";
-
 export interface CreateReviewDto {
-    missionId: number;
+    userId: number;
     content: string;
-    star: Decimal;
+    star: number;
 }
 
 export interface ReviewRow {
-    id: bigint;
-    userId: bigint;
-    restaurantId: bigint | null;
+    id: number;
+    userId: number;
+    restaurantId: number | null;
     content: string | null;
-    star: Decimal | null;
+    star: { toString(): string } | null;
 }
 
 export interface ReviewItem {
-    id: string;
-    userId: string;
-    restaurantId: string | null;
+    id: number;
+    userId: number;
+    restaurantId: number | null;
     content: string | null;
-    star: Decimal | null;
+    star: string | null;
 }
 
 export interface ReviewListResponse {
@@ -30,15 +28,15 @@ export interface ReviewListResponse {
 }
 
 export interface MissionRow {
-    id: bigint;
-    restaurantId: bigint | null;
+    id: number;
+    restaurantId: number | null;
     price: number | null;
     point: number | null;
 }
 
 export interface MissionItem {
-    id: string;
-    restaurantId: string | null;
+    id: number;
+    restaurantId: number | null;
     price: number | null;
     point: number | null;
 }
@@ -50,6 +48,10 @@ export interface MissionListResponse {
     };
 }
 
+
+
+
+
 export const responseFromReviews = (
     reviews: ReviewRow[],
     cursor: number
@@ -58,17 +60,23 @@ export const responseFromReviews = (
     return {
         data: reviews.map((review) => ({
             ...review,
-            id: review.id.toString(),
-            restaurantId: review.restaurantId?.toString() || null,
-            userId: review.userId.toString(),
+            id: review.id,
+            restaurantId: review.restaurantId,
+            userId: review.userId,
             content: review.content,
-            star: review.star === null ? null : Decimal(review.star),
+            star: review.star?.toString() || null,
         })),
         pagination: {
             cursor: reviews.length === 5 ? cursor + 1 : null,
         },
     };
 };
+
+
+export interface CreateReviewResponse {
+    missions: MissionRow[],
+    cursor: number
+}
 
 export const responseFromMissions = (
     missions: MissionRow[],
@@ -78,8 +86,8 @@ export const responseFromMissions = (
     return {
         data: missions.map((mission) => ({
             ...mission,
-            id: mission.id.toString(),
-            restaurantId: mission.restaurantId?.toString() || null,
+            id: mission.id,
+            restaurantId: mission.restaurantId,
             price: mission.price,
             point: mission.point,
         })),

@@ -1,168 +1,81 @@
-import { Request, Response, NextFunction } from "express";
-import { createReviewService, createMissionService } from "./restaurant.service.js";
-import { StatusCodes } from "http-status-codes";
-import { listRestaurantReviewsService, listRestaurantMissionsService } from "./restaurant.service.js";
-import { parseBigInt } from "../../utils/parse.js";
+import { Response, SuccessResponse, Query, Body, Controller, Get, Path, Post, Route, Tags } from "tsoa";
+import {
+    createMissionService,
+    createReviewService,
+    listRestaurantMissionsService,
+    listRestaurantReviewsService,
+} from "./restaurant.service.js";
+import { CreateReviewDto, MissionListResponse, ReviewListResponse } from "./restaurant.dto.js";
+import { ApiResponse, success } from "../../common/responses/response.js";
 
-export const createReview = async (req: Request, res: Response) => {
-    try {
-        console.log("[createReview] request received", {
-            method: req.method,
-            originalUrl: req.originalUrl,
-            params: req.params,
-            body: req.body
-        });
+interface CreateMissionDto {
+    name: string;
+    price: number | null;
+    point: number | null;
+}
 
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const userId = BigInt(req.body.userId);
-        const { content, star } = req.body;
+@Route("restaurants")
+@Tags("Restaurants")
+export class RestaurantController extends Controller {
+    /**
+    * 리뷰 작성 API
+    * @summary 사용자가 음식점에 리뷰를 작성하는 엔드포인트입니다.
+    */
+    @Post("{restaurantId}/reviews")
+    @SuccessResponse(201, "리뷰 작성 성공")
+    @Response<ApiResponse<null>>(409, "이미 작성된 리뷰 에러")
+    public async createReview(
+        @Path() restaurantId: number,
+        @Body() body: CreateReviewDto
+    ): Promise<ApiResponse<ReviewListResponse>> {
+        const result = await createReviewService(restaurantId, body);
 
-        console.log("[createReview] parsed request data", {
-            userId,
-            restaurantId,
-            content,
-            star
-        });
-
-        await createReviewService(userId, restaurantId, content, star);
-
-        return res.json({
-            success: true,
-            code: "S200",
-            message: "리뷰 작성 성공",
-            data: null
-        });
-    } catch (err: any) {
-        console.error("[createReview] failed", {
-            message: err?.message,
-            stack: err?.stack,
-            params: req.params,
-            body: req.body
-        });
-
-        if (err.message === "REVIEW_ALREADY_EXISTS") {
-            return res.status(400).json({
-                success: false,
-                code: "E401",
-                message: "이미 리뷰를 작성했습니다.",
-                data: null
-            });
-        }
-
-        if (err.message === "RESTAURANT_NOT_EXIST") {
-            return res.status(404).json({
-                success: false,
-                code: "RESTAURANT_NOT_EXIST",
-                message: "존재하지 않는 식당입니다.",
-                data: null
-            });
-        }
-
-        if (err.message === "INVALID_USER_ID") {
-            return res.status(400).json({
-                success: false,
-                code: "INVALID_USER_ID",
-                message: "userId가 올바르지 않습니다.",
-                data: null
-            });
-        }
-
-        if (err.message === "INVALID_RESTAURANT_ID") {
-            return res.status(400).json({
-                success: false,
-                code: "INVALID_RESTAURANT_ID",
-                message: "restaurantId가 올바르지 않습니다.",
-                data: null
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            code: "E500",
-            message: "서버 에러",
-            data: null
-        });
+        return success(result);
     }
-};
 
-export const createMission = async (req: Request, res: Response) => {
-    try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const { name, price, point } = req.body;
-
+    @Post("{restaurantId}/missions")
+    @SuccessResponse(201, "미션 생성 성공")
+    public async createMission(
+        @Path() restaurantId: number,
+        @Body() body: CreateMissionDto
+    ): Promise<ApiResponse<MissionListResponse>> {
         const result = await createMissionService(
             restaurantId,
-            name,
-            price,
-            point
+            body.name,
+            body.price,
+            body.point
         );
 
-        return res.json({
-            success: true,
-            code: "S200",
-            message: "가게 등록 성공",
+        return success({
             data: [{
-                ...result,
-                missionId: result.missionId.toString(),
-                restaurantId: result.restaurantId.toString(),
-            }]
-        });
-
-    } catch (err: any) {
-        if (err.message === "RESTAURANT_NOT_EXIST") {
-            return res.status(404).json({
-                success: false,
-                code: "RESTAURANT_NOT_EXIST",
-                message: "존재하지 않는 식당입니다.",
-                data: null
-            });
-        }
-
-        return res.status(500).json({
-            success: false,
-            code: "E500",
-            message: "서버 에러",
-            data: null
+                id: result.missionId,
+                restaurantId: result.restaurantId,
+                price: result.price,
+                point: result.point,
+            }],
+            pagination: { cursor: null },
         });
     }
-};
 
-export const listRestaurantReviews = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const cursor =
-            typeof req.query.cursor === "string"
-                ? parseInt(req.query.cursor, 10)
-                : 0;
-
+    @Get("{restaurantId}/reviews")
+    @SuccessResponse(200, "리뷰 목록 조회 성공")
+    public async listRestaurantReviews(
+        @Path() restaurantId: number,
+        @Query() cursor: number = 0
+    ): Promise<ApiResponse<ReviewListResponse>> {
         const reviews = await listRestaurantReviewsService(restaurantId, cursor);
 
-        res.status(StatusCodes.OK).json(reviews);
-    } catch (err) {
-        next(err);
+        return success(reviews);
     }
-};
 
-export const listRestaurantMissions = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const restaurantId = parseBigInt(req.params.restaurantId);
-        const cursor =
-            typeof req.query.cursor === "string"
-                ? parseInt(req.query.cursor, 10)
-                : 0;
-
+    @Get("{restaurantId}/missions")
+    @SuccessResponse(200, "미션 목록 조회 성공")
+    public async listRestaurantMissions(
+        @Path() restaurantId: number,
+        @Query() cursor: number = 0
+    ): Promise<ApiResponse<MissionListResponse>> {
         const missions = await listRestaurantMissionsService(restaurantId, cursor);
 
-        res.status(StatusCodes.OK).json(missions);
-    } catch (err) {
-        next(err);
+        return success(missions);
     }
-};
+}

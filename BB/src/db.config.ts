@@ -10,7 +10,7 @@ const adapter = new PrismaMariaDb({
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
+    port: parseInt(process.env.DB_PORT!),
     connectionLimit: 10,
 });
 
@@ -24,7 +24,7 @@ dotenv.config();
 export const pool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
-    port: parseInt(process.env.DB_PORT || "3306"), // 포트 번호
+    port: parseInt(process.env.DB_PORT!), // 포트 번호
     // 환경 변수는 기본적으로 문자열이에요. 숫자가 필요한 port 필드를 위해 parseInt로 형변환을 해줍니다! 
     database: process.env.DB_NAME, // 데이터베이스 이름
     password: process.env.DB_PASSWORD, // 비밀번호
