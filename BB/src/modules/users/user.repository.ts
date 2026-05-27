@@ -5,7 +5,7 @@ import type { Gender as GenderType } from "../../generated/prisma/enums.js";
 interface AddUserRequest {
     email: string;
     name: string;
-    gender: string;
+    gender: Gender;
     birth: Date;
     address?: string;
     phone: string;
@@ -53,6 +53,22 @@ export const getUser = async (userId: number) => {
             phone: true,
         }
     });
+};
+
+
+export const updateUser = async (userId: number, data: AddUserRequest) => {
+    const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+            name: data.name,
+            gender: data.gender,
+            birth: data.birth,
+            address: data.address,
+            phone: data.phone,
+        }
+    });
+
+    return updatedUser.id;
 };
 
 export const setPreference = async (userId: number, preferences: number[]) => {

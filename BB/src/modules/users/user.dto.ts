@@ -1,7 +1,9 @@
+import type { Gender } from "../../generated/prisma/enums.js";
+
 export interface UserSignUpRequest {
     email: string;
     name: string;
-    gender: string;
+    gender: Gender;
     birth: Date;
     address?: string;
     phone: string;
@@ -12,7 +14,7 @@ export interface UserSignUpResponse {
     userId: number;
     email: string;
     name: string;
-    gender: string;
+    gender: Gender;
     birth: Date;
     address?: string;
     phone: string;

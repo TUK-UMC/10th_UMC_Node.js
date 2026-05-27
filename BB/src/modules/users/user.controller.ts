@@ -2,8 +2,9 @@ import { Request as ExpressRequest, Response as ExpressResponse, NextFunction } 
 import { Body, Controller, Post, Route, Tags, Path, Get, Query, Request, Middlewares, Res, Response, SuccessResponse } from "tsoa";
 import { StatusCodes } from "http-status-codes";
 import { UserSignUpRequest, UserSignUpResponse, ChallengeMissionRequest, ChallengeMissionResponse, UserMissionListResponse, UserReviewListResponse } from "./user.dto.js";
-import { userSignUp, challengeMissionService, listUserReviewsService, listUserMissionsService } from "./user.service.js";
+import { userSignUp, challengeMissionService, listUserReviewsService, listUserMissionsService, userInfoUpdate } from "./user.service.js";
 import { ApiResponse, success } from "../../common/responses/response.js";
+import { isLogin } from "../../common/middlewares/auth.middleware.js";
 
 @Route("users")
 @Tags("Users")
@@ -23,10 +24,31 @@ export class UserController extends Controller {
     }
 
     /**
+    * 정보수정 API
+    * @summary 정보를 수정하는 엔드포인트입니다.
+    */
+    @Post("{userId}/profile")
+    @Middlewares(
+        isLogin
+    )
+    @SuccessResponse(200, "정보수정 성공")
+    @Response<ApiResponse<null>>(400, "잘못된 요청")
+    public async handleUserInfoUpdate(
+        @Path() userId: number,
+        @Body() body: UserSignUpRequest
+    ): Promise<ApiResponse<UserSignUpResponse>> {
+        const user = await userInfoUpdate(userId, body);
+        return success(user);
+    }
+
+    /**
    * 미션 도전 API
    * @summary 유저가 미션을 도전하는 엔드포인트입니다.
    */
     @Post("{userId}/missions/challenge")
+    @Middlewares(
+        isLogin
+    )
     @SuccessResponse(201, "유저 미션 도전 성공")
     @Response<null>(404, "USER_OR_MISSION_OR_RESTAURANT_NOT_EXIST")
     @Response<null>(409, "MISSION_ALREADY_ONGOING")
@@ -49,6 +71,9 @@ export class UserController extends Controller {
    * @summary 유저의 미션 목록을 조회하는 엔드포인트입니다.
    */
     @Get("{userId}/missions")
+    @Middlewares(
+        isLogin
+    )
     @SuccessResponse(200, "유저의 미션 목록 조회 성공")
     public async listUserMissions(
         @Path() userId: number,
@@ -69,6 +94,9 @@ export class UserController extends Controller {
    * @summary 유저가 작성한 리뷰 목록을 조회하는 엔드포인트입니다.
    */
     @Get("{userId}/reviews")
+    @Middlewares(
+        isLogin
+    )
     @SuccessResponse(200, "유저의 리뷰 목록 조회 성공")
     public async listUserReviews(
         @Path() userId: number,
