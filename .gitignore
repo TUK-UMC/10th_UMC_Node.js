@@ -151,4 +151,4 @@ dist
 
 
 .vscode/
-BB/src/generated/prisma/
+BB/src/generated/
