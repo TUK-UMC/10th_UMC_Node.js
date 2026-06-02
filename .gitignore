@@ -151,6 +151,9 @@ dist
 
 # End of https://www.toptal.com/developers/gitignore/api/node
 
-ballie/ch04/src/generated/prisma
-ballie/src/generated/
-ballie/prisma/migrations/
+
+/src/generated/prisma/
+
+
+.vscode/
+BB/src/generated/prisma/
