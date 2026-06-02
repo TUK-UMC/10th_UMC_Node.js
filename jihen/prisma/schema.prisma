@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique(map: "email") @db.VarChar(50)
+  password      String   @default("") @db.VarChar(255)
+  name          String   @db.VarChar(100)
+  gender        String   @db.VarChar(15)
+  birth         DateTime @db.Date
+  address       String   @db.VarChar(255)
+  detailAddress String?  @map("detail_address") @db.VarChar(255)
+  phoneNumber   String   @map("phone_number") @db.VarChar(15)
+
+  userFavorCategories UserFavorCategory[]
+  userStoreReviews    UserStoreReview[]
+
+  @@map("user")
+}
+
+model FoodCategory {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(50)
+
+  userFavorCategories UserFavorCategory[]
+
+  @@map("food_category")
+}
+
+model UserFavorCategory {
+  id             Int           @id @default(autoincrement())
+  userId         Int?          @map("user_id")
+  foodCategoryId Int?          @map("food_category_id")
+
+  user         User?         @relation(fields: [userId], references: [id])
+  foodCategory FoodCategory? @relation(fields: [foodCategoryId], references: [id])
+
+  @@index([foodCategoryId], map: "f_category_id")
+  @@index([userId], map: "user_id")
+  @@map("user_favor_category")
+}
+
+model Region {
+  regionId BigInt @id @default(autoincrement()) @map("region_id")
+  name     String @db.VarChar(20)
+
+  stores       Store[]
+  pointHistory PointHistory[]
+
+  @@map("region")
+}
+
+model Member {
+  memberId   BigInt    @id @default(autoincrement()) @map("member_id")
+  email      String    @unique @db.VarChar(50)
+  nickname   String?   @db.VarChar(20)
+  name       String    @db.VarChar(30)
+  gender     Int?
+  birth      DateTime? @db.Date
+  phoneNum   String?   @map("phone_num") @db.VarChar(15)
+  status     Int       @default(1)
+  point      Int       @default(0)
+  provider   String?   @db.VarChar(50)
+  providerId String?   @map("provider_id") @db.VarChar(100)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.DateTime(6)
+  deletedAt  DateTime? @map("deleted_at") @db.DateTime(6)
+
+  memberMissions MemberMission[]
+  pointHistory   PointHistory[]
+  reviews        Review[]
+
+  @@map("member")
+}
+
+model Store {
+  storeId   BigInt   @id @default(autoincrement()) @map("store_id")
+  regionId  BigInt   @map("region_id")
+  name      String   @db.VarChar(50)
+  address   String   @db.VarChar(255)
+  category  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.DateTime(6)
+
+  region      Region       @relation(fields: [regionId], references: [regionId])
+  storeImages StoreImage[]
+  missions    Mission[]
+  reviews     Review[]
+
+  @@map("store")
+}
+
+model StoreImage {
+  imageId   BigInt @id @default(autoincrement()) @map("image_id")
+  storeId   BigInt @map("store_id")
+  imageUrl  String @map("image_url") @db.VarChar(255)
+  sortOrder Int    @default(0) @map("sort_order")
+
+  store Store @relation(fields: [storeId], references: [storeId])
+
+  @@map("store_image")
+}
+
+model Mission {
+  missionId   BigInt    @id @default(autoincrement()) @map("mission_id")
+  storeId     BigInt    @map("store_id")
+  title       String    @db.VarChar(50)
+  description String?   @db.Text
+  rewardPoint Int       @default(0) @map("reward_point")
+  startAt     DateTime? @map("start_at") @db.DateTime(6)
+  endAt       DateTime? @map("end_at") @db.DateTime(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.DateTime(6)
+
+  store          Store           @relation(fields: [storeId], references: [storeId])
+  memberMissions MemberMission[]
+
+  @@map("mission")
+}
+
+model MemberMission {
+  membermissionId BigInt    @id @default(autoincrement()) @map("membermission_id")
+  memberId        BigInt    @map("member_id")
+  missionId       BigInt    @map("mission_id")
+  status          Int       @default(0)
+  completedAt     DateTime? @map("completed_at") @db.DateTime(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.DateTime(6)
+
+  member  Member  @relation(fields: [memberId], references: [memberId])
+  mission Mission @relation(fields: [missionId], references: [missionId])
+
+  @@map("member_mission")
+}
+
+model PointHistory {
+  pointhistoryId BigInt   @id @default(autoincrement()) @map("pointhistory_id")
+  memberId       BigInt   @map("member_id")
+  regionId       BigInt   @map("region_id")
+  point          Int
+  type           Int
+  createdAt      DateTime @default(now()) @map("created_at") @db.DateTime(6)
+
+  member Member @relation(fields: [memberId], references: [memberId])
+  region Region @relation(fields: [regionId], references: [regionId])
+
+  @@map("point_history")
+}
+
+model Review {
+  reviewId  BigInt   @id @default(autoincrement()) @map("review_id")
+  memberId  BigInt   @map("member_id")
+  storeId   BigInt   @map("store_id")
+  body      String   @db.Text
+  score     Float
+  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.DateTime(6)
+
+  member Member @relation(fields: [memberId], references: [memberId])
+  store  Store  @relation(fields: [storeId], references: [storeId])
+
+  @@map("review")
+}
+
+model PracticeStore {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(100)
+
+  userStoreReviews UserStoreReview[]
+
+  @@map("practice_store")
+}
+
+model UserStoreReview {
+  id      Int    @id @default(autoincrement())
+  storeId Int    @map("store_id")
+  userId  Int    @map("user_id")
+  content String @db.Text
+
+  store PracticeStore @relation(fields: [storeId], references: [id])
+  user  User          @relation(fields: [userId], references: [id])
+
+  @@map("user_store_review")
+}

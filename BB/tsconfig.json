@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    /* 프로젝트 구조 설정 */
+    "rootDir": "./src", // 소스 코드(.ts)가 모여있는 폴더예요.
+    "outDir": "./dist", // 컴파일된 결과물(.js)이 저장될 폴더예요.
+    /* 언어 및 모듈 설정 (4주차에서 배운 ESM 방식을 유지해요!) */
+    "target": "ESNext",
+    "module": "NodeNext", // 최신 Node.js의 모듈 시스템(ESM)을 사용합니다.
+    "moduleResolution": "NodeNext",
+    "experimentalDecorators": true,
+    "lib": [
+      "ESNext"
+    ], // 최신 자바스크립트 표준 기능을 사용할 수 있게 해줘요.
+    /* 엄격한 검사 옵션 (에러를 미리 잡는 핵심!) */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    /* 기타 추천 옵션 */
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ] // 빌드 결과물(dist)도 검사에서 제외하는 게 좋아요!
+}

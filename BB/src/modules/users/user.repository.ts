@@ -1,0 +1,136 @@
+import { prisma } from "../../db.config.js";
+
+export const addUser = async (data: any) => {
+    const user = await prisma.user.findFirst({ where: { email: data.email } });
+
+    if (user) {
+        return null;
+    }
+
+    const created = await prisma.user.create({
+        data: {
+            email: data.email,
+            name: data.name,
+            gender: data.gender,
+            birth: data.birth,
+            address: data.address,
+            phone: data.phone,
+        },
+    });
+
+    return created.id;
+};
+
+export const getUser = async (userId: bigint) => {
+    return await prisma.user.findUnique({
+        where: { id: userId },
+    });
+};
+
+export const setPreference = async (userId: bigint, categoryId: bigint) => {
+    await prisma.userPreference.create({
+        data: {
+            userId,
+            categoryId,
+        },
+    });
+};
+
+export const getUserPreferencesByUserId = async (userId: bigint) => {
+    return await prisma.userPreference.findMany({
+        where: { userId },
+        include: {
+            category: true,
+        },
+        orderBy: { categoryId: "asc" },
+    });
+};
+
+export const findMission = async (missionId: bigint) => {
+    return await prisma.mission.findUnique({
+        where: { id: missionId },
+    });
+};
+
+export const findOngoingMission = async (userId: bigint, missionId: bigint) => {
+    return await prisma.complete.findFirst({
+        where: {
+            userId,
+            missionId,
+            isCompleted: false,
+        },
+    });
+};
+
+export const insertChallenge = async (
+    userId: bigint,
+    missionId: bigint,
+    restaurantId: bigint
+) => {
+    await prisma.complete.create({
+        data: {
+            userId,
+            missionId,
+            restaurantId,
+            isCompleted: false,
+        },
+    });
+};
+
+export const getAllUserReviews = async (
+    userId: bigint,
+    cursor: number
+) => {
+    const take = 5;
+
+    return await prisma.review.findMany({
+        select: {
+            id: true,
+            content: true,
+            restaurantId: true,
+            userId: true,
+            star: true,
+        },
+        where: {
+            userId,
+        },
+        orderBy: {
+            id: "asc",
+        },
+        skip: cursor * take,
+        take,
+    });
+};
+
+export const getAllUserMissions = async (
+    userId: bigint,
+    cursor: number
+) => {
+    const take = 5;
+
+    const completes = await prisma.complete.findMany({
+        select: {
+            mission: {
+                select: {
+                    id: true,
+                    restaurantId: true,
+                    price: true,
+                    point: true,
+                },
+            },
+        },
+
+        where: {
+            userId,
+        },
+
+        orderBy: {
+            id: "asc",
+        },
+
+        skip: cursor * take,
+        take,
+    });
+
+    return completes.map((complete) => complete.mission);
+};
