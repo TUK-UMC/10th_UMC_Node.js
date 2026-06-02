@@ -1,7 +1,10 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
+import passport from "passport";
+import jwt from "jsonwebtoken";
+import { UnauthorizedError, InvalidTokenError, ExpiredTokenError } from "../error/error.js";
+
 export function authorizeUser() {
     return async (req: Request, res: Response, next: NextFunction) => {
-        // cookie-parser가 만들어준 req.cookies 객체에서 username을 확인
         const { username } = req.cookies;
         if (username) {
             console.log(`[인증 성공] ${username}님, 환영합니다.`);
@@ -16,3 +19,25 @@ export function authorizeUser() {
         }
     };
 }
+
+export const jwtAuth = (): RequestHandler => (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+        return next(new UnauthorizedError());
+    }
+
+    const token = authHeader.slice(7);
+    try {
+        jwt.verify(token, process.env.JWT_SECRET!);
+    } catch (err) {
+        if (err instanceof jwt.TokenExpiredError) return next(new ExpiredTokenError());
+        return next(new InvalidTokenError());
+    }
+
+    passport.authenticate("jwt", { session: false }, (err: any, user: any) => {
+        if (err) return next(err);
+        if (!user) return next(new UnauthorizedError());
+        req.user = user;
+        next();
+    })(req, res, next);
+};

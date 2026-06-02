@@ -1,25 +1,34 @@
 import dotenv from "dotenv";
+(BigInt.prototype as any).toJSON = function () { return this.toString(); };
 import express, {Express, NextFunction, Request, Response} from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { RegisterRoutes } from "./generated/routes.js";
 import morgan from "morgan";
 import {AppError} from "./common/error/app.error";
+import { jwtAuth } from "./common/middlewares/auth.middleware.js";
+import { googleStrategy , jwtStrategy } from "./auth.config.js";
 import swaggerUi from "swagger-ui-express"
 import path from "path";
 import fs from "fs"
+import passport from "passport";
+
 
 // 1. 환경 변수 설정
 dotenv.config();
-
 const app: Express = express();
 const port = process.env.PORT || 3000;
 app.use((req: Request, res: Response, next: NextFunction) => {
-    res.error = function ({ errorCode = null, message = null, data = null }) {
+    res.success = function (data) {
+        return this.json({
+            resultType: "SUCCESS",
+            data,
+        });
+    };
+    res.error = function ({ errorCode = null, message = null }) {
         return this.json({
             resultType: "FAILED",
-            error: { errorCode, message, data },
-            data: null,
+            error: { errorCode, message },
         });
     };
     next();
@@ -27,24 +36,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 app.use(morgan("dev"));
 app.use(cookieParser());
-app.get("/test",(req,res) => {
-    res.send("hello!");
-})
 
-app.get('/setcookie',(req,res) => {
-    res.cookie('myCookie','hello',{maxAge:6000})
-    res.send("ok")
-})
-
-app.get('/getcookie', (req,res) => {
-    const myCookie = req.cookies.myCookie
-    if (myCookie) {
-        console.log(req.cookies);
-        res.send(`당신의 쿠키 : ${myCookie}`);
-    }else {
-        res.send("쿠키가 없습니다")
-    }
-})
 
 // 2. 미들웨어 설정
 app.use(cors(
@@ -53,12 +45,21 @@ app.use(cors(
 app.use(express.static('public'));    // 정적 파일 접근
 app.use(express.json());              // request의 본문을 json으로 해석할 수 있도록 함(JSON 형태의 요청 body를 파싱하기 위함)
 app.use(express.urlencoded({ extended: false })); // 단순 객체 문자열 형태로 본문 데이터 해석
-
+app.use(passport.initialize());
+passport.use(googleStrategy);
+passport.use(jwtStrategy);
 
 const swaggerFile = JSON.parse(
     fs.readFileSync(path.resolve("dist/swagger.json"), "utf8")
 );
 
+app.get("/oauth2/login/google", passport.authenticate("google", { session: false }));
+app.get("/oauth2/callback/google", 
+  passport.authenticate("google", { session: false, failureRedirect: "/login-failed" }),
+  (req, res) => {
+    res.status(200).json({ success: true, tokens: req.user });
+  }
+);
 // 2. Swagger UI 연결
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
@@ -68,30 +69,19 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 
+const isLogin = jwtAuth();
+
 const router = express.Router();
 RegisterRoutes(router);
 app.use("/api/v1", router);
 
 
-const isLogin = (req: Request, res: Response, next: NextFunction) => {
-    const {username} = req.cookies;
-
-    if (username) {
-        console.log(`[인증성공] ${username} 님 환영합니다`);
-        next()
-    }else {
-        console.log('[인증실패] 로그인이 필요합니다')
-        res.status(401).send('<script>alert("로그인이 필요합니다!");location.href="/login";</script>')
-    }
-}
-
-app.get('/mypage',isLogin,(req: Request, res: Response) => {
-    res.send(`
-        <h1>마이페이지</h1>
-        <p>환영합니다, ${req.cookies.username}님!</p>
-        <p>이 페이지는 로그인한 사람만 볼 수 있습니다.</p>
-    `)
-})
+app.get('/mypage', isLogin , (req, res) => {
+  res.status(200).success({
+    message: `인증 성공! ${req.user!.name}님의 마이페이지입니다.`,
+    user: req.user,
+  });
+});
 
 
 app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
@@ -100,9 +90,8 @@ app.use((err: AppError, req: Request, res: Response, next: NextFunction) => {
     }
 
     res.status(err.statusCode || 500).error({
-        errorCode: err.errorCode || "unknown",
+        errorCode: err.errorCode || "INTERNAL_SERVER_ERROR",
         message: err.message || null,
-        data: err.data || null,
     });
 });
 

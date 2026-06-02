@@ -15,16 +15,22 @@ enum Gender {
   FEMALE
 }
 
+enum ProviderType {
+  GOOGLE
+  NAVER
+  KAKAO
+}
+
 // 유저
 model User {
   userId       BigInt    @id @default(autoincrement()) @map("user_id")
   email        String?   @db.VarChar(50)
   name         String    @map("user_name") @db.VarChar(10)
-  gender       Gender
+  gender       Gender?
   birth        DateTime? @map("birthday")
   address      String?   @db.VarChar(50)
   phoneNumber  String?   @map("phone_number") @db.VarChar(20)
-  password     String    @db.VarChar(100)
+  password     String?   @db.VarChar(100)
   regionId     BigInt?   @map("region_id")
   region       Region?   @relation(fields: [regionId], references: [regionId])
   isDeleted    Boolean?  @default(false) @map("is_deleted")
@@ -36,8 +42,22 @@ model User {
   reviews             Review[]
   userMissions        UserMission[]
   alarms              Alarm[]
+  providers           Provider[]
 
   @@map("users")
+}
+
+// 소셜 로그인 제공자
+model Provider {
+  providerId     BigInt       @id @default(autoincrement()) @map("provider_id")
+  provider       ProviderType
+  providerUserId String       @map("provider_user_id") @db.VarChar(100)
+  userId         BigInt       @map("user_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("provider")
 }
 
 // 음식 카테고리
