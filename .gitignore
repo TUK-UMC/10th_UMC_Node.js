@@ -4,6 +4,7 @@ ballie/.env
 .env
 .idea
 node_modules/
+.gitignore
 
 ### Node ###
 # Logs

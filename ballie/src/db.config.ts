@@ -1,9 +1,14 @@
+import { fileURLToPath } from "url";
+import path from "path";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
-
-import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+
+// __dirname 등가물 (ESM에서는 import.meta.url 사용)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const adapter = new PrismaMariaDb({
   host: process.env.DB_HOST,
@@ -16,18 +21,15 @@ const adapter = new PrismaMariaDb({
 
 export const prisma = new PrismaClient({
   adapter,
-  log: ["query","info", "error", "warn"], // 쿼리 로그, 에러 로그, 경고 로그를 모두 출력하도록 설정
+  log: ["query","info", "error", "warn"],
 });
 
-dotenv.config();
-
 export const pool = mysql.createPool({
-    host: process.env.DB_HOST || "localhost", // mysql의 hostname
-    user: process.env.DB_USER || "root", // user 이름
-    port: parseInt(process.env.DB_PORT || "3306"), // 포트 번호
-    // 환경 변수는 기본적으로 문자열이에요. 숫자가 필요한 port 필드를 위해 parseInt로 형변환을 해줍니다!
-    database: process.env.DB_NAME || "umc_10th", // 데이터베이스 이름
-    password: process.env.DB_PASSWORD || "password", // 비밀번호
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    port: parseInt(process.env.DB_PORT!),
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
     waitForConnections: true,
     // Pool에 획득할 수 있는 connection이 없을 때,
     // true면 요청을 queue에 넣고 connection을 사용할 수 있게 되면 요청을 실행하며, false이면 즉시 오류를 내보내고 다시 요청
