@@ -16,8 +16,10 @@ import {
     getUserPreferencesByUserId,
     insertChallenge,
     setPreference,
+    updateUser
 } from "./user.repository.js";
 import { DuplicateUserEmailError, MissionAlreadyOngoingError } from "../../common/errors/error.js";
+import { prisma } from "../../db.config.js";
 
 export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpResponse> => {
     const joinUserId = await addUser({
@@ -49,7 +51,48 @@ export const userSignUp = async (data: UserSignUpRequest): Promise<UserSignUpRes
         preferences,
         name: user.name ?? "",
         email: user.email ?? "",
-        gender: user.gender ?? "",
+        gender: user.gender ?? "NONE",
+        birth: user.birth ?? new Date(),
+        address: user.address ?? undefined,
+        phone: user.phone ?? "",
+    };
+};
+
+export const userInfoUpdate = async (userId: number, data: UserSignUpRequest): Promise<UserSignUpResponse> => {
+    const updatedUserId = await updateUser(userId, {
+        email: data.email,
+        name: data.name,
+        gender: data.gender,
+        birth: new Date(data.birth),
+        address: data.address,
+        phone: data.phone,
+    });
+
+    // 기존 선호도 삭제
+    await prisma.userPreference.deleteMany({
+        where: { userId }
+    });
+
+    // 새 선호도 저장
+    if (data.preferences.length > 0) {
+        await setPreference(userId, data.preferences);
+    }
+
+    const preferences = (await getUserPreferencesByUserId(updatedUserId))
+        .map((obj) => obj.category.name)
+        .filter((name): name is string => name !== null);
+
+    const user = await getUser(updatedUserId);
+    if (!user) {
+        throw new Error("USER_NOT_EXIST");
+    }
+
+    return {
+        userId: user.id,
+        preferences,
+        name: user.name ?? "",
+        email: user.email ?? "",
+        gender: user.gender ?? "NONE",
         birth: user.birth ?? new Date(),
         address: user.address ?? undefined,
         phone: user.phone ?? "",
