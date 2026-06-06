@@ -1,0 +1,128 @@
+name: deploy-main
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+      - name: Inject environment variables
+        run: |
+          cat > .env <<'EOF'
+          ${{ secrets.EC2_DOT_ENV }}
+          EOF
+        env:
+          EC2_DOT_ENV: ${{ secrets.EC2_DOT_ENV }}
+      - name: Generate + Build
+        run: npx prisma generate&&npm run build
+      - name: Prune devDependencies (runtime) + Regenerate
+        run: |
+          npm prune --omit=dev
+          npx -p prisma prisma generate
+      - name: Pack artifact
+        run: |
+          mkdir -p artifact
+          cp -r dist artifact/dist
+          cp -r node_modules artifact/node_modules
+          cp package.json package-lock.json prisma.config.ts artifact/
+          if [ -d prisma ]; then cp -r prisma artifact/prisma; fi
+          tar -czf artifact.tgz -C artifact .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-artifact
+          path: artifact.tgz
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-artifact
+          path: .
+      - name: Extract artifact
+        run: |
+          mkdir -p artifact
+          tar -xzf artifact.tgz -C artifact
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat >> ~/.ssh/config <<END
+          Host target
+              HostName $EC2_HOST
+              Port $EC2_PORT
+              User $EC2_USER
+              IdentityFile ~/.ssh/id_rsa
+              StrictHostKeyChecking no
+          END
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+      - name: Copy artifact to Server
+        run: |
+          ssh target 'sudo mkdir -p /opt/app/umc10th/incoming&&sudo chown -R ubuntu:ubuntu /opt/app/umc10th'
+          cd artifact
+          rsync -az --delete --ignore-missing-args\
+              --exclude ".git" \
+              --exclude ".env" \
+              ./dist ./prisma ./node_modules ./package.json ./package-lock.json prisma.config.ts \
+              target:/opt/app/umc10th/incoming/
+      - name: Switch Environment
+        run: |
+          ssh target '
+              set -e
+              cd /opt/app/umc10th
+              rm -rf current
+              mv incoming current
+              '
+      - name: Create environment variables
+        run: |
+          ssh target "cat > /opt/app/umc10th/current/.env <<'EOF'
+          ${{ secrets.EC2_DOT_ENV }}
+          EOF"
+        env:
+          EC2_DOT_ENV: ${{ secrets.EC2_DOT_ENV }}
+      - name: Config systemd service file
+        run: |
+          ssh target 'sudo systemctl unmask UMC_10th || true'
+
+          cat <<'EOF' | ssh target 'sudo tee /etc/systemd/system/UMC_10th.service > /dev/null'
+          [Unit]
+          Description=UMC_10th
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/opt/app/umc10th/current
+          ExecStart=/bin/bash -lc 'source /home/ubuntu/.nvm/nvm.sh && npm run start'
+          Restart=always
+          Environment=NODE_ENV=production
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          ssh target 'sudo systemctl daemon-reload'
+          ssh target 'sudo systemctl enable UMC_10th'
+          ssh target 'sudo systemctl restart UMC_10th'
+
+      - name: Check service status
+        run: |
+          ssh target 'sudo systemctl status UMC_10th -l --no-pager'
