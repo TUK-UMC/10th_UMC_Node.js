@@ -21,6 +21,7 @@ jobs:
         working-directory: ./BB
         run: npm ci
       - name: Inject environment variables
+        working-directory: ./BB
         run: |
           cat > .env <<'EOF'
           ${{ secrets.EC2_DOT_ENV }}
