@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Middlewares, Post, Request, Route, Tags } from "tsoa";
+import { Body, Controller, Get, Middlewares, Post, Request, Response as TsoaResponse, Route, Tags } from "tsoa";
 import { Request as ExpressRequest } from "express";
 import { type UserSignUpRequest, type UserSignUpResponse } from "../dtos/user.dto";
 import { signUpUser } from "../services/user.service";
@@ -8,7 +8,13 @@ import { type ApiResponse, success } from "../../../common/responses/response";
 @Route("users")
 @Tags("Users")
 export class UserController extends Controller {
+  /**
+   * 회원가입을 처리하는 엔드포인트입니다.
+   * @summary 회원가입 API
+   */
   @Post("signup")
+  @TsoaResponse<ApiResponse<UserSignUpResponse>>(200, "회원가입 성공")
+  @TsoaResponse<ApiResponse<null>>(409, "중복된 이메일 에러")
   public async handleUserSignUp(
     @Body() body: UserSignUpRequest,
   ): Promise<ApiResponse<UserSignUpResponse>> {

@@ -4,6 +4,7 @@ import express, { type Express, type NextFunction, type Request, type Response }
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
+import swaggerUiExpress from "swagger-ui-express";
 import { RegisterRoutes } from "./generated/routes";
 import { AppError } from "./common/errors/app.error";
 
@@ -25,6 +26,15 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("Hello World! This is TypeScript Server!");
 });
 
+app.use(
+  "/docs",
+  swaggerUiExpress.serve,
+  swaggerUiExpress.setup({}, { swaggerOptions: { url: "/openapi.json" } })
+);
+app.get("/openapi.json", (_req, res) => {
+  res.sendFile("swagger.json", { root: "./dist" });
+});
+
 const router = express.Router();
 RegisterRoutes(router);
 app.use("/api/v1", router);
@@ -33,7 +43,9 @@ app.use((err: AppError, _req: Request, res: Response, next: NextFunction) => {
   if (res.headersSent) {
     return next(err);
   }
-  res.status(err.statusCode || 500).json({
+  console.error("[ERROR]", err);
+  const statusCode = err.statusCode ?? (err as any).status ?? 500;
+  res.status(statusCode).json({
     resultType: "FAILED",
     error: {
       errorCode: err.errorCode || "unknown",
