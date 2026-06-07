@@ -1,0 +1,291 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum ProviderType {
+  GOOGLE
+  NAVER
+  KAKAO
+}
+
+// 유저
+model User {
+  userId       BigInt    @id @default(autoincrement()) @map("user_id")
+  email        String?   @db.VarChar(50)
+  name         String    @map("user_name") @db.VarChar(10)
+  gender       Gender?
+  birth        DateTime? @map("birthday")
+  address      String?   @db.VarChar(50)
+  phoneNumber  String?   @map("phone_number") @db.VarChar(20)
+  password     String?   @db.VarChar(100)
+  regionId     BigInt?   @map("region_id")
+  region       Region?   @relation(fields: [regionId], references: [regionId])
+  isDeleted    Boolean?  @default(false) @map("is_deleted")
+  missionPoint Int?      @default(0) @map("mission_point")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  userFavorCategories UserFavorCategory[]
+  reviews             Review[]
+  userMissions        UserMission[]
+  alarms              Alarm[]
+  providers           Provider[]
+
+  @@map("users")
+}
+
+// 소셜 로그인 제공자
+model Provider {
+  providerId     BigInt       @id @default(autoincrement()) @map("provider_id")
+  provider       ProviderType
+  providerUserId String       @map("provider_user_id") @db.VarChar(100)
+  userId         BigInt       @map("user_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@map("provider")
+}
+
+// 음식 카테고리
+model FoodCategory {
+  foodCategoryId BigInt   @id @default(autoincrement()) @map("food_category_id")
+  categoryName   String   @db.VarChar(50) @map("food_category_name")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  userFavorCategories UserFavorCategory[]
+  restaurants         Restaurant[]
+
+  @@map("food_category")
+}
+
+// 유저 선호 음식 카테고리
+model UserFavorCategory {
+  userFavorCategoryId BigInt   @id @default(autoincrement()) @map("user_favor_category_id")
+  userId              BigInt   @map("user_id")
+  foodCategoryId      BigInt   @map("food_category_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  user         User         @relation(fields: [userId], references: [userId])
+  foodCategory FoodCategory @relation(fields: [foodCategoryId], references: [foodCategoryId])
+
+  @@index([foodCategoryId], map: "food_category_id")
+  @@index([userId], map: "user_id")
+  @@map("user_favor_category")
+}
+
+// 지역
+model Region {
+  regionId   BigInt   @id @default(autoincrement()) @map("region_id")
+  regionName String   @map("region_name")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  users          User[]
+  restaurants    Restaurant[]
+  missionRegions MissionRegion[]
+
+  @@map("region")
+}
+
+// 식당
+model Restaurant {
+  restaurantId   BigInt   @id @default(autoincrement()) @map("restaurant_id")
+  restaurantName String   @map("restaurant_name") @db.VarChar(20)
+  regionId       BigInt?  @map("region_id")
+  region         Region?  @relation(fields: [regionId], references: [regionId])
+  foodCategoryId BigInt?  @map("food_category_id")
+  foodCategory   FoodCategory? @relation(fields: [foodCategoryId], references: [foodCategoryId])
+  isDeleted      Boolean? @default(false) @map("is_deleted")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  reviews            Review[]
+  missionRestaurants MissionRestaurant[]
+  restaurantImages   RestaurantImage[]
+  alarmRestaurants   AlarmRestaurant[]
+
+  @@map("restaurant")
+}
+
+// 식당 이미지
+model RestaurantImage {
+  restaurantImageId  BigInt   @id @default(autoincrement()) @map("restaurant_image_id")
+  restaurantId       BigInt   @map("restaurant_id")
+  restaurantImageUrl String   @db.Text @map("restaurant_image_url")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [restaurantId])
+
+  @@map("restaurant_image")
+}
+
+// 리뷰
+model Review {
+  reviewId      BigInt   @id @default(autoincrement()) @map("review_id")
+  userId        BigInt   @map("user_id")
+  restaurantId  BigInt   @map("restaurant_id")
+  reviewTitle   String   @db.VarChar(20) @map("review_title")
+  reviewContent String   @db.Text @map("review_content")
+  score         Float
+  isDeleted     Boolean? @default(false) @map("is_deleted")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user         User          @relation(fields: [userId], references: [userId])
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [restaurantId])
+  reviewImages ReviewImage[]
+
+  @@map("review")
+}
+
+// 리뷰 이미지
+model ReviewImage {
+  reviewImageId  BigInt   @id @default(autoincrement()) @map("review_image_id")
+  reviewId       BigInt   @map("review_id")
+  reviewImageUrl String   @db.Text @map("review_image_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  review Review @relation(fields: [reviewId], references: [reviewId])
+
+  @@map("review_image")
+}
+
+enum MissionType {
+  REGION
+  RESTAURANT
+}
+
+// 미션
+model Mission {
+  missionId      BigInt      @id @default(autoincrement()) @map("mission_id")
+  missionTitle   String      @db.VarChar(30) @map("mission_title")
+  missionContent String      @db.Text @map("mission_content")
+  missionPoint   Int         @map("mission_point")
+  missionType    MissionType @map("mission_type")
+  isDeleted      Boolean?    @default(false) @map("is_deleted")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  missionRegion     MissionRegion?
+  missionRestaurant MissionRestaurant?
+  userMissions      UserMission[]
+
+  @@map("mission")
+}
+
+// 지역 미션
+model MissionRegion {
+  missionRegionId BigInt   @id @default(autoincrement()) @map("mission_region_id")
+  missionId       BigInt   @unique @map("mission_id")
+  regionId        BigInt   @map("region_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  mission Mission @relation(fields: [missionId], references: [missionId])
+  region  Region  @relation(fields: [regionId], references: [regionId])
+
+  @@map("mission_region")
+}
+
+// 식당 미션
+model MissionRestaurant {
+  missionRestaurantId BigInt   @id @default(autoincrement()) @map("mission_restaurant_id")
+  missionId           BigInt   @unique @map("mission_id")
+  restaurantId        BigInt   @map("restaurant_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  mission    Mission    @relation(fields: [missionId], references: [missionId])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [restaurantId])
+
+  @@map("mission_restaurant")
+}
+
+enum UserMissionStatus {
+  ACTIVE
+  PENDING
+  COMPLETED
+  ENDED
+}
+
+// 유저 미션
+model UserMission {
+  userMissionId     BigInt            @id @default(autoincrement()) @map("user_mission_id")
+  userId            BigInt            @map("user_id")
+  missionId         BigInt            @map("mission_id")
+  userMissionStatus UserMissionStatus @default(PENDING) @map("user_mission_status")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [userId])
+  mission Mission @relation(fields: [missionId], references: [missionId])
+
+  @@map("user_mission")
+}
+
+enum AlarmType {
+  RESTAURANT
+  NOTICE
+}
+
+// 알람
+model Alarm {
+  alarmId      BigInt    @id @default(autoincrement()) @map("alarm_id")
+  userId       BigInt    @map("user_id")
+  alarmType    AlarmType @map("alarm_type")
+  isDeleted    Boolean?  @default(false) @map("is_deleted")
+  alarmTitle   String    @db.VarChar(30) @map("alarm_title")
+  alarmContent String    @db.Text @map("alarm_content")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [userId])
+  alarmNotice     AlarmNotice?
+  alarmRestaurant AlarmRestaurant?
+
+  @@map("alarm")
+}
+
+// 알람 공지
+model AlarmNotice {
+  alarmNoticeId BigInt   @id @default(autoincrement()) @map("alarm_notice_id")
+  alarmId       BigInt   @unique @map("alarm_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  alarm Alarm @relation(fields: [alarmId], references: [alarmId])
+
+  @@map("alarm_notice")
+}
+
+// 알람 식당
+model AlarmRestaurant {
+  alarmRestaurantId BigInt   @id @default(autoincrement()) @map("alarm_restaurant_id")
+  alarmId           BigInt   @unique @map("alarm_id")
+  restaurantId      BigInt   @map("restaurant_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  alarm      Alarm      @relation(fields: [alarmId], references: [alarmId])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [restaurantId])
+
+  @@map("alarm_restaurant")
+}
