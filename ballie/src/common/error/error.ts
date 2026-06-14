@@ -1,39 +1,39 @@
 import { AppError } from "./app.error.js";
-import { ErrorCode } from "./error.code.js";
+import { ErrorCode, ErrorCodeType } from "./error.code.js";
 
 // HTTP 표준 에러 클래스
 export class BadRequestException extends AppError {
-    constructor(message: string, errorCode = ErrorCode.BAD_REQUEST) {
+    constructor(message: string, errorCode: ErrorCodeType = ErrorCode.BAD_REQUEST) {
         super({ errorCode, statusCode: 400, message });
     }
 }
 
 export class UnauthorizedException extends AppError {
-    constructor(message: string, errorCode = ErrorCode.UNAUTHORIZED) {
+    constructor(message: string, errorCode: ErrorCodeType = ErrorCode.UNAUTHORIZED) {
         super({ errorCode, statusCode: 401, message });
     }
 }
 
 export class ForbiddenException extends AppError {
-    constructor(message: string, errorCode = ErrorCode.FORBIDDEN) {
+    constructor(message: string, errorCode: ErrorCodeType = ErrorCode.FORBIDDEN) {
         super({ errorCode, statusCode: 403, message });
     }
 }
 
 export class NotFoundException extends AppError {
-    constructor(message: string, errorCode = ErrorCode.NOT_FOUND) {
+    constructor(message: string, errorCode: ErrorCodeType = ErrorCode.NOT_FOUND) {
         super({ errorCode, statusCode: 404, message });
     }
 }
 
 export class ConflictException extends AppError {
-    constructor(message: string, errorCode = ErrorCode.CONFLICT) {
+    constructor(message: string, errorCode: ErrorCodeType = ErrorCode.CONFLICT) {
         super({ errorCode, statusCode: 409, message });
     }
 }
 
 export class InternalServerException extends AppError {
-    constructor(message: string, errorCode = ErrorCode.INTERNAL_SERVER_ERROR) {
+    constructor(message: string, errorCode: ErrorCodeType = ErrorCode.INTERNAL_SERVER_ERROR) {
         super({ errorCode, statusCode: 500, message });
     }
 }
