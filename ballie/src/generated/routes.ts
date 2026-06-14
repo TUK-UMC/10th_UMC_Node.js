@@ -39,8 +39,17 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"ref":"UserProfileResponse","required":true},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ErrorResponse": {
+        "dataType": "refObject",
+        "properties": {
+            "errorCode": {"dataType":"string","required":true},
+            "message": {"dataType":"string","required":true},
+            "statusCode": {"dataType":"double","required":true},
         },
         "additionalProperties": false,
     },
@@ -58,7 +67,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"ref":"UpdateProfileResponse","required":true},
         },
         "additionalProperties": false,
@@ -100,7 +108,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"dataType":"array","array":{"dataType":"refObject","ref":"reviewInfoDTO"},"required":true},
         },
         "additionalProperties": false,
@@ -125,7 +132,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"ref":"UserMissionStartResponse","required":true},
         },
         "additionalProperties": false,
@@ -150,7 +156,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"dataType":"array","array":{"dataType":"refObject","ref":"UserRestaurantMissionDTO"},"required":true},
         },
         "additionalProperties": false,
@@ -172,7 +177,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"dataType":"array","array":{"dataType":"refObject","ref":"ActiveUserMissionDTO"},"required":true},
         },
         "additionalProperties": false,
@@ -182,7 +186,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"dataType":"enum","enums":[null],"required":true},
         },
         "additionalProperties": false,
@@ -207,7 +210,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"ref":"ReviewCreateResponse","required":true},
         },
         "additionalProperties": false,
@@ -238,7 +240,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"ref":"RestaurantCreateResponse","required":true},
         },
         "additionalProperties": false,
@@ -272,7 +273,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"ref":"MissionRestaurantCreateResponse","required":true},
         },
         "additionalProperties": false,
@@ -306,7 +306,6 @@ const models: TsoaRoute.Models = {
         "dataType": "refObject",
         "properties": {
             "resultType": {"dataType":"enum","enums":["SUCCESS"],"required":true},
-            "error": {"dataType":"enum","enums":[null],"required":true},
             "data": {"dataType":"array","array":{"dataType":"refObject","ref":"RestaurantMissionDTO"},"required":true},
         },
         "additionalProperties": false,
@@ -421,10 +420,10 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsUserMissionController_handleUserMissionAdd: Record<string, TsoaRoute.ParameterSchema> = {
-                userId: {"in":"path","name":"userId","required":true,"dataType":"double"},
                 missionId: {"in":"path","name":"missionId","required":true,"dataType":"double"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
-        app.post('/userMissions/:userId/mission/:missionId',
+        app.post('/userMissions/mission/:missionId',
             ...(fetchMiddlewares<RequestHandler>(UserMissionController)),
             ...(fetchMiddlewares<RequestHandler>(UserMissionController.prototype.handleUserMissionAdd)),
 
@@ -452,9 +451,9 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsUserMissionController_handleGetUserRestaurantMission: Record<string, TsoaRoute.ParameterSchema> = {
-                userId: {"in":"path","name":"userId","required":true,"dataType":"double"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
-        app.get('/userMissions/:userId/restaurant',
+        app.get('/userMissions/restaurant',
             ...(fetchMiddlewares<RequestHandler>(UserMissionController)),
             ...(fetchMiddlewares<RequestHandler>(UserMissionController.prototype.handleGetUserRestaurantMission)),
 
@@ -482,9 +481,9 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsUserMissionController_handleGetActiveUserMissions: Record<string, TsoaRoute.ParameterSchema> = {
-                userId: {"in":"path","name":"userId","required":true,"dataType":"double"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
-        app.get('/userMissions/:userId/active',
+        app.get('/userMissions/active',
             ...(fetchMiddlewares<RequestHandler>(UserMissionController)),
             ...(fetchMiddlewares<RequestHandler>(UserMissionController.prototype.handleGetActiveUserMissions)),
 
@@ -513,6 +512,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsUserMissionController_handleCompleteUserMission: Record<string, TsoaRoute.ParameterSchema> = {
                 userMissionId: {"in":"path","name":"userMissionId","required":true,"dataType":"double"},
+                req: {"in":"request","name":"req","required":true,"dataType":"object"},
         };
         app.patch('/userMissions/:userMissionId/complete',
             ...(fetchMiddlewares<RequestHandler>(UserMissionController)),
