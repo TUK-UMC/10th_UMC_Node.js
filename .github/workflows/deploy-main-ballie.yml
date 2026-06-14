@@ -30,7 +30,7 @@ jobs:
           EC2_DOT_ENV_BALLIE: ${{ secrets.EC2_DOT_ENV_BALLIE }}
       - name: Generate + Build
         working-directory: ./ballie
-        run: npx tsoa spec-and-routes&&npx prisma generate&&npm run build
+        run: npx prisma generate&&npx tsoa spec-and-routes&&npm run build
       - name: Prune devDependencies (runtime) + Regenerate
         working-directory: ./ballie
         run: |
