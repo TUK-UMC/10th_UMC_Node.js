@@ -1,0 +1,134 @@
+name: deploy-main-ballie
+on:
+  push:
+    branches:
+      - feat/issue-75
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ./ballie/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./ballie
+        run: npm ci
+      - name: Inject environment variables
+        working-directory: ./ballie
+        run: |
+          cat > .env <<'EOF'
+          ${{ secrets.EC2_DOT_ENV_BALLIE }}
+          EOF
+        env:
+          EC2_DOT_ENV_BALLIE: ${{ secrets.EC2_DOT_ENV_BALLIE }}
+      - name: Generate + Build
+        working-directory: ./ballie
+        run: npx tsoa spec-and-routes&&npx prisma generate&&npm run build
+      - name: Prune devDependencies (runtime) + Regenerate
+        working-directory: ./ballie
+        run: |
+          npm prune --omit=dev
+          npx -p prisma prisma generate
+      - name: Pack artifact
+        working-directory: ./ballie
+        run: |
+          mkdir -p artifact
+          cp -r dist artifact/dist
+          cp -r node_modules artifact/node_modules
+          cp package.json package-lock.json prisma.config.ts artifact/
+          if [ -d prisma ]; then cp -r prisma artifact/prisma; fi
+          tar -czf artifact.tgz -C artifact .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-artifact
+          path: ballie/artifact.tgz
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-artifact
+          path: .
+      - name: Extract artifact
+        run: |
+          mkdir -p artifact
+          tar -xzf artifact.tgz -C artifact
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$EC2_SSH_KEY_BALLIE" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat >> ~/.ssh/config <<END
+          Host target
+              HostName $EC2_HOST_BALLIE
+              Port $EC2_PORT_BALLIE
+              User $EC2_USER_BALLIE
+              IdentityFile ~/.ssh/id_rsa
+              StrictHostKeyChecking no
+          END
+        env:
+          EC2_SSH_KEY_BALLIE: ${{ secrets.EC2_SSH_KEY_BALLIE }}
+          EC2_HOST_BALLIE: ${{ secrets.EC2_HOST_BALLIE }}
+          EC2_PORT_BALLIE: ${{ secrets.EC2_PORT_BALLIE }}
+          EC2_USER_BALLIE: ${{ secrets.EC2_USER_BALLIE }}
+      - name: Copy artifact to Server
+        run: |
+          ssh target 'sudo mkdir -p /opt/app/ballie/incoming&&sudo chown -R ubuntu:ubuntu /opt/app/ballie'
+          cd artifact
+          rsync -az --delete --ignore-missing-args\
+              --exclude ".git" \
+              --exclude ".env" \
+              ./dist ./prisma ./node_modules ./package.json ./package-lock.json prisma.config.ts \
+              target:/opt/app/ballie/incoming/
+      - name: Switch Environment
+        run: |
+          ssh target '
+              set -e
+              cd /opt/app/ballie
+              rm -rf current
+              mv incoming current
+              '
+      - name: Create environment variables
+        run: |
+          ssh target "cat > /opt/app/ballie/current/.env <<'EOF'
+          ${{ secrets.EC2_DOT_ENV_BALLIE }}
+          EOF"
+        env:
+          EC2_DOT_ENV_BALLIE: ${{ secrets.EC2_DOT_ENV_BALLIE }}
+      - name: Config systemd service file
+        run: |
+          ssh target 'sudo systemctl unmask ballie || true'
+
+          cat <<'EOF' | ssh target 'sudo tee /etc/systemd/system/ballie.service > /dev/null'
+          [Unit]
+          Description=ballie
+          After=network.target
+
+          [Service]
+          User=ubuntu
+          WorkingDirectory=/opt/app/ballie/current
+          ExecStart=/bin/bash -lc 'source /home/ubuntu/.nvm/nvm.sh && npm run start'
+          Restart=always
+          Environment=NODE_ENV=production
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          ssh target 'sudo systemctl daemon-reload'
+          ssh target 'sudo systemctl enable ballie'
+          ssh target 'sudo systemctl restart ballie'
+
+      - name: Check service status
+        run: |
+          ssh target 'sudo systemctl status ballie -l --no-pager'
