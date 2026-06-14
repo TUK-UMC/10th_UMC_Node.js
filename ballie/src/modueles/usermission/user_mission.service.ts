@@ -9,12 +9,12 @@ export const userMissionAdd = async (userId: number, missionId: number): Promise
     try {
         const user = await getUserById(userId);
         if (!user) {
-            throw new UserNotFoundError("존재하지 않는 유저입니다.", { userId });
+            throw new UserNotFoundError("존재하지 않는 유저입니다.");
         }
 
         const mission = await getMission(missionId);
         if (!mission) {
-            throw new MissionNotFoundError("존재하지 않는 미션입니다.", { missionId });
+            throw new MissionNotFoundError("존재하지 않는 미션입니다.");
         }
 
         const userMissionId = await addUserMission({ userId, missionId });
@@ -40,13 +40,13 @@ export const getUserRestaurantMission = async (userId: number): Promise<UserRest
     try {
         const user = await getUserById(userId);
         if (!user) {
-            throw new UserNotFoundError("존재하지 않는 유저입니다.", { userId });
+            throw new UserNotFoundError("존재하지 않는 유저입니다.");
         }
 
         const userRestaurantMissions = await getRestaurantMissionbyUserId(userId);
         return userRestaurantMissions.map((um) => {
             if (!um.mission.missionRestaurant) {
-                throw new MissionNotFoundError("식당과 연결되지 않은 미션 데이터입니다.", { missionId: Number(um.mission.missionId) });
+                throw new MissionNotFoundError("식당과 연결되지 않은 미션 데이터입니다.");
             }
             return {
                 userMissionId: Number(um.userMissionId),
@@ -69,7 +69,7 @@ export const getActiveUserMission = async (userId: number): Promise<ActiveUserMi
     try {
         const user = await getUserById(userId);
         if (!user) {
-            throw new UserNotFoundError("존재하지 않는 유저입니다.", { userId });
+            throw new UserNotFoundError("존재하지 않는 유저입니다.");
         }
 
         const activeUserMissions = await getActiveUserMissions(userId);
@@ -90,11 +90,11 @@ export const completeUserMission = async (userMissionId: number): Promise<void> 
     try {
         const userMission = await getUserMissionById(userMissionId);
         if (!userMission) {
-            throw new UserMissionNotFoundError("존재하지 않는 유저미션입니다.", { userMissionId });
+            throw new UserMissionNotFoundError("존재하지 않는 유저미션입니다.");
         }
 
         if (userMission.userMissionStatus !== UserMissionStatus.ACTIVE) {
-            throw new UserMissionStatusError("ACTIVE 상태의 미션만 완료할 수 있습니다.", { userMissionId, currentStatus: userMission.userMissionStatus });
+            throw new UserMissionStatusError("ACTIVE 상태의 미션만 완료할 수 있습니다.");
         }
 
         await updateUserMissionStatus(userMissionId);

@@ -7,12 +7,12 @@ export const restaurantAdd = async (data: RestaurantCreateRequest): Promise<Rest
     try {
         const region = await getRegionById(data.regionId);
         if (!region) {
-            throw new RegionNotFoundError("존재하지 않는 지역입니다", data);
+            throw new RegionNotFoundError("존재하지 않는 지역입니다");
         }
 
         const foodCategory = await getFoodCategoryById(data.foodCategoryId);
         if (!foodCategory) {
-            throw new FoodCategoryNotFoundError("존재하지 않는 카테고리입니다", data);
+            throw new FoodCategoryNotFoundError("존재하지 않는 카테고리입니다");
         }
 
         const restaurantId = await addRestaurant({
