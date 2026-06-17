@@ -1,23 +1,65 @@
 name: jihen-CD
 on:
-  workflow_run:
-    workflows: ["jihen-CI"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+    paths:
+      - "jihen/**"
+      - ".github/workflows/jihen-CD.yml"
   workflow_dispatch:
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ./jihen/package-lock.json
+      - name: Install dependencies
+        working-directory: ./jihen
+        run: npm ci
+      - name: Inject environment variables
+        working-directory: ./jihen
+        run: |
+          cat > .env <<'EOF'
+          ${{ secrets.JIHEN_EC2_DOT_ENV }}
+          EOF
+      - name: Generate + Build
+        working-directory: ./jihen
+        run: npm run build
+      - name: Prune devDependencies (runtime) + Regenerate
+        working-directory: ./jihen
+        run: |
+          npm prune --omit=dev
+          npx -p prisma prisma generate
+      - name: Pack artifact
+        working-directory: ./jihen
+        run: |
+          mkdir -p artifact
+          cp -r dist artifact/dist
+          cp -r node_modules artifact/node_modules
+          cp package.json package-lock.json prisma.config.ts artifact/
+          if [ -d prisma ]; then cp -r prisma artifact/prisma; fi
+          tar -czf artifact.tgz -C artifact .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jihen-app-artifact
+          path: jihen/artifact.tgz
+
   deploy:
     runs-on: ubuntu-latest
-    # CI가 성공했을 때만 배포를 진행합니다 (수동 실행은 항상 허용)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    needs: build
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: jihen-app-artifact
           path: .
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Extract artifact
         run: |
           mkdir -p artifact

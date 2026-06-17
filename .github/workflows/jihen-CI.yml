@@ -1,7 +1,8 @@
 name: jihen-CI
 on:
-  push:
+  pull_request:
     branches:
+      - develop
       - main
     paths:
       - "jihen/**"
@@ -32,22 +33,3 @@ jobs:
       - name: Generate + Build
         working-directory: ./jihen
         run: npm run build
-      - name: Prune devDependencies (runtime) + Regenerate
-        working-directory: ./jihen
-        run: |
-          npm prune --omit=dev
-          npx -p prisma prisma generate
-      - name: Pack artifact
-        working-directory: ./jihen
-        run: |
-          mkdir -p artifact
-          cp -r dist artifact/dist
-          cp -r node_modules artifact/node_modules
-          cp package.json package-lock.json prisma.config.ts artifact/
-          if [ -d prisma ]; then cp -r prisma artifact/prisma; fi
-          tar -czf artifact.tgz -C artifact .
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: jihen-app-artifact
-          path: jihen/artifact.tgz
