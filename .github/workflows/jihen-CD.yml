@@ -1,0 +1,81 @@
+name: jihen-CD
+on:
+  workflow_run:
+    workflows: ["jihen-CI"]
+    types:
+      - completed
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # CI가 성공했을 때만 배포를 진행합니다 (수동 실행은 항상 허용)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jihen-app-artifact
+          path: .
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract artifact
+        run: |
+          mkdir -p artifact
+          tar -xzf artifact.tgz -C artifact
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$JIHEN_EC2_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat >> ~/.ssh/config <<END
+          Host target
+              HostName $JIHEN_EC2_HOST
+              Port $JIHEN_EC2_PORT
+              User $JIHEN_EC2_USER
+              IdentityFile ~/.ssh/id_rsa
+              StrictHostKeyChecking no
+          END
+        env:
+          JIHEN_EC2_SSH_KEY: ${{ secrets.JIHEN_EC2_SSH_KEY }}
+          JIHEN_EC2_HOST: ${{ secrets.JIHEN_EC2_HOST }}
+          JIHEN_EC2_PORT: ${{ secrets.JIHEN_EC2_PORT }}
+          JIHEN_EC2_USER: ${{ secrets.JIHEN_EC2_USER }}
+      - name: Copy artifact to Server
+        run: |
+          ssh target 'sudo mkdir -p /opt/app/jihen/incoming && sudo chown -R ubuntu:ubuntu /opt/app/jihen'
+          cd artifact
+          rsync -az --delete --ignore-missing-args \
+              --exclude ".git" \
+              --exclude ".env" \
+              ./dist ./prisma ./node_modules ./package.json ./package-lock.json prisma.config.ts \
+              target:/opt/app/jihen/incoming/
+      - name: Switch Environment
+        run: |
+          ssh target '
+              set -e
+              cd /opt/app/jihen
+              rm -rf current
+              mv incoming current
+              '
+      - name: Create environment variables
+        run: |
+          ssh target "cat > /opt/app/jihen/current/.env <<'EOF'
+          ${{ secrets.JIHEN_EC2_DOT_ENV }}
+          EOF"
+        env:
+          JIHEN_EC2_DOT_ENV: ${{ secrets.JIHEN_EC2_DOT_ENV }}
+      - name: Start / Reload app with PM2
+        run: |
+          ssh target '
+              set -e
+              source ~/.nvm/nvm.sh
+              cd /opt/app/jihen/current
+              export NODE_ENV=production
+              # 이미 실행 중이면 재시작, 처음이면 새로 시작
+              pm2 restart jihen --update-env || pm2 start npm --name jihen -- start
+              # 현재 프로세스 목록 저장 (재부팅 후 자동 복원용)
+              pm2 save
+              '
+      - name: Check service status
+        run: |
+          ssh target 'source ~/.nvm/nvm.sh && pm2 list && pm2 logs jihen --lines 20 --nostream'

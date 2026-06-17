@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsoa spec-and-routes && npx tsx src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsoa spec-and-routes && npx prisma generate && tsc",
     "dev": "tsoa spec-and-routes && nodemon --exec \"npx tsx\" src/index.ts"
   },
   "author": "",
