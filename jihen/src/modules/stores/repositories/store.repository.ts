@@ -1,4 +1,5 @@
 import { prisma } from "../../../db.config";
+import { StoreCategory, MissionStatus } from "../../../generated/prisma/enums";
 import { type AddStoreRequest, type AddReviewRequest, type AddMissionRequest } from "../dtos/store.dto";
 
 interface Store {
@@ -6,7 +7,7 @@ interface Store {
   regionId: bigint;
   name: string;
   address: string;
-  category: number;
+  category: StoreCategory;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,10 +25,10 @@ interface Mission {
 }
 
 interface MemberMission {
-  membermissionId: bigint;
+  memberMissionId: bigint;
   memberId: bigint;
   missionId: bigint;
-  status: number;
+  status: MissionStatus;
   completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -93,33 +94,33 @@ export const getMissionById = async (missionId: number): Promise<{ missionId: bi
   });
 };
 
-export const getChallengingMission = async (memberId: number, missionId: number): Promise<{ membermissionId: bigint } | null> => {
+export const getChallengingMission = async (memberId: number, missionId: number): Promise<{ memberMissionId: bigint } | null> => {
   return await prisma.memberMission.findFirst({
-    where: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: 0 },
-    select: { membermissionId: true },
+    where: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: MissionStatus.IN_PROGRESS },
+    select: { memberMissionId: true },
   });
 };
 
 export const challengeMission = async (memberId: number, missionId: number): Promise<number> => {
   const result = await prisma.memberMission.create({
-    data: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: 0 },
+    data: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: MissionStatus.IN_PROGRESS },
   });
-  return Number(result.membermissionId);
+  return Number(result.memberMissionId);
 };
 
 export const getAllStoreReviews = async (storeId: number, cursor: number) => {
-  return await prisma.userStoreReview.findMany({
+  return await prisma.review.findMany({
     select: {
-      id: true,
-      content: true,
+      reviewId: true,
+      body: true,
       store: true,
-      user: true,
+      member: true,
     },
     where: {
-      storeId,
-      id: { gt: cursor },
+      storeId: BigInt(storeId),
+      reviewId: { gt: BigInt(cursor) },
     },
-    orderBy: { id: "asc" },
+    orderBy: { reviewId: "asc" },
     take: 5,
   });
 };
@@ -144,7 +145,7 @@ export const getMissionsByStoreId = async (storeId: number): Promise<Mission[]> 
 
 export const getOngoingMissionsByMemberId = async (memberId: number): Promise<OngoingMission[]> => {
   return await prisma.memberMission.findMany({
-    where: { memberId: BigInt(memberId), status: 0 },
+    where: { memberId: BigInt(memberId), status: MissionStatus.IN_PROGRESS },
     include: {
       mission: {
         include: { store: true },
@@ -156,7 +157,7 @@ export const getOngoingMissionsByMemberId = async (memberId: number): Promise<On
 
 export const completeMemberMission = async (memberMissionId: number): Promise<MemberMission> => {
   return await prisma.memberMission.update({
-    where: { membermissionId: BigInt(memberMissionId) },
-    data: { status: 1, completedAt: new Date() },
+    where: { memberMissionId: BigInt(memberMissionId) },
+    data: { status: MissionStatus.COMPLETE, completedAt: new Date() },
   }) as MemberMission;
 };

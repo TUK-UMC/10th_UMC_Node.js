@@ -76,7 +76,7 @@ export const getStoreMissions = async (storeId: number): Promise<MissionItem[]> 
 export const getMyOngoingMissions = async (memberId: number): Promise<OngoingMissionItem[]> => {
   const missions = await getOngoingMissionsByMemberId(memberId);
   return missions.map((m) => ({
-    membermissionId: Number(m.membermissionId),
+    membermissionId: Number(m.memberMissionId),
     status: m.status,
     mission: {
       missionId: Number(m.mission.missionId),
@@ -92,7 +92,7 @@ export const getMyOngoingMissions = async (memberId: number): Promise<OngoingMis
 export const finishMission = async (memberMissionId: number): Promise<CompleteMissionResponse> => {
   const result = await completeMemberMission(memberMissionId);
   return {
-    membermissionId: Number(result.membermissionId),
+    membermissionId: Number(result.memberMissionId),
     status: result.status,
     completedAt: result.completedAt,
   };
@@ -100,9 +100,15 @@ export const finishMission = async (memberMissionId: number): Promise<CompleteMi
 
 export const listStoreReviews = async (storeId: number, cursor: number): Promise<ReviewsResponse> => {
   const reviews = await getAllStoreReviews(storeId, cursor);
+  const data = reviews.map((r) => ({
+    id: Number(r.reviewId),
+    content: r.body,
+    store: r.store,
+    user: r.member,
+  }));
   const lastReview = reviews[reviews.length - 1];
   return {
-    data: reviews,
-    pagination: { cursor: lastReview ? lastReview.id : null },
+    data,
+    pagination: { cursor: lastReview ? Number(lastReview.reviewId) : null },
   };
 };

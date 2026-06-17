@@ -1,3 +1,5 @@
+import { type StoreCategory } from "../../../generated/prisma/enums";
+
 export interface AddStoreRequest {
   /** 지역 ID */
   regionId: number;
@@ -5,8 +7,8 @@ export interface AddStoreRequest {
   name: string;
   /** 가게 주소 */
   address: string;
-  /** 카테고리 (예: 1=한식, 2=중식) */
-  category: number;
+  /** 카테고리 (KOREAN, JAPANESE, CHINESE, WESTERN, CAFE, FAST_FOOD, OTHER) */
+  category: StoreCategory;
 }
 export interface AddStoreResponse {
   /** 생성된 가게 ID */
@@ -90,8 +92,8 @@ export interface ReviewsResponse {
 export interface OngoingMissionItem {
   /** 멤버미션 ID */
   membermissionId: number;
-  /** 미션 상태 */
-  status: number;
+  /** 미션 상태 (IN_PROGRESS, COMPLETE) */
+  status: string;
   /** 미션 정보 */
   mission: {
     missionId: number;
@@ -103,8 +105,8 @@ export interface OngoingMissionItem {
 export interface CompleteMissionResponse {
   /** 완료된 멤버미션 ID */
   membermissionId: number;
-  /** 변경된 상태 */
-  status: number;
+  /** 변경된 상태 (IN_PROGRESS, COMPLETE) */
+  status: string;
   /** 완료 시각 */
   completedAt: Date | null;
 }
