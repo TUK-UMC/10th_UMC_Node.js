@@ -1,4 +1,5 @@
 import { prisma } from "../../../db.config";
+import { MissionStatus } from "../../../generated/prisma/enums";
 
 interface Store {
   storeId: bigint;
@@ -12,14 +13,14 @@ interface Mission {
 }
 
 interface OngoingMission {
-  membermissionId: bigint;
-  status: number;
+  memberMissionId: bigint;
+  status: MissionStatus;
   mission: Mission;
 }
 
 export const getOngoingMissionsByMemberId = async (memberId: number): Promise<OngoingMission[]> => {
   return await prisma.memberMission.findMany({
-    where: { memberId: BigInt(memberId), status: 0 },
+    where: { memberId: BigInt(memberId), status: MissionStatus.IN_PROGRESS },
     include: {
       mission: {
         include: { store: true },

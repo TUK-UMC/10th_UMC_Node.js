@@ -1,4 +1,5 @@
 import { prisma } from "../../../db.config";
+import { MissionStatus } from "../../../generated/prisma/enums";
 import { type AddMissionRequest } from "../dtos/mission.dto";
 
 interface Mission {
@@ -14,10 +15,10 @@ interface Mission {
 }
 
 interface MemberMission {
-  membermissionId: bigint;
+  memberMissionId: bigint;
   memberId: bigint;
   missionId: bigint;
-  status: number;
+  status: MissionStatus;
   completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -62,16 +63,16 @@ export const getMissionsByStoreId = async (storeId: number): Promise<Mission[]> 
   }) as Mission[];
 };
 
-export const getChallengingMission = async (memberId: number, missionId: number): Promise<{ membermissionId: bigint } | null> => {
+export const getChallengingMission = async (memberId: number, missionId: number): Promise<{ memberMissionId: bigint } | null> => {
   return await prisma.memberMission.findFirst({
-    where: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: 0 },
-    select: { membermissionId: true },
+    where: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: MissionStatus.IN_PROGRESS },
+    select: { memberMissionId: true },
   });
 };
 
 export const challengeMission = async (memberId: number, missionId: number): Promise<number> => {
   const result = await prisma.memberMission.create({
-    data: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: 0 },
+    data: { memberId: BigInt(memberId), missionId: BigInt(missionId), status: MissionStatus.IN_PROGRESS },
   });
-  return Number(result.membermissionId);
+  return Number(result.memberMissionId);
 };

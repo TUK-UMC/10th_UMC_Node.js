@@ -4,7 +4,7 @@ import { getOngoingMissionsByMemberId } from "../repositories/member.repository"
 export const getMyOngoingMissions = async (memberId: number): Promise<OngoingMissionItem[]> => {
   const missions = await getOngoingMissionsByMemberId(memberId);
   return missions.map((m) => ({
-    membermissionId: Number(m.membermissionId),
+    membermissionId: Number(m.memberMissionId),
     status: m.status,
     mission: {
       missionId: Number(m.mission.missionId),

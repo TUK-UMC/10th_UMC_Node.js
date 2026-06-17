@@ -1,10 +1,11 @@
 import { prisma } from "../../../db.config";
+import { MissionStatus } from "../../../generated/prisma/enums";
 
 interface MemberMission {
-  membermissionId: bigint;
+  memberMissionId: bigint;
   memberId: bigint;
   missionId: bigint;
-  status: number;
+  status: MissionStatus;
   completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -12,7 +13,7 @@ interface MemberMission {
 
 export const completeMemberMission = async (memberMissionId: number): Promise<MemberMission> => {
   return await prisma.memberMission.update({
-    where: { membermissionId: BigInt(memberMissionId) },
-    data: { status: 1, completedAt: new Date() },
+    where: { memberMissionId: BigInt(memberMissionId) },
+    data: { status: MissionStatus.COMPLETE, completedAt: new Date() },
   }) as MemberMission;
 };

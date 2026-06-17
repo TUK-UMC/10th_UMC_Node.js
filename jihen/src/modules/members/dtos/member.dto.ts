@@ -1,6 +1,6 @@
 export interface OngoingMissionItem {
   membermissionId: number;
-  status: number;
+  status: string;
   mission: {
     missionId: number;
     title: string;

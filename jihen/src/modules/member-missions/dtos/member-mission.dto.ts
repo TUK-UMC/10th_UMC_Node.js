@@ -1,5 +1,5 @@
 export interface CompleteMissionResponse {
   membermissionId: number;
-  status: number;
+  status: string;
   completedAt: Date | null;
 }
