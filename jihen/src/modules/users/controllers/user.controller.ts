@@ -1,25 +1,33 @@
-import { Body, Controller, Get, Middlewares, Post, Request, Response as TsoaResponse, Route, Tags } from "tsoa";
+import { Body, Controller, Get, Middlewares, Patch, Post, Request, Route, Tags } from "tsoa";
 import { Request as ExpressRequest } from "express";
-import { type UserSignUpRequest, type UserSignUpResponse } from "../dtos/user.dto";
-import { signUpUser } from "../services/user.service";
+import {
+  type UserSignUpRequest, type UserSignUpResponse,
+  type UpdateUserRequest, type UpdateUserResponse,
+} from "../dtos/user.dto";
+import { signUpUser, updateMyInfo } from "../services/user.service";
 import { authorizeUser } from "../../../common/middlewares/auth.middleware";
+import { requireJwt } from "../../../common/middlewares/jwt.middleware";
 import { type ApiResponse, success } from "../../../common/responses/response";
 
 @Route("users")
 @Tags("Users")
 export class UserController extends Controller {
-  /**
-   * 회원가입을 처리하는 엔드포인트입니다.
-   * @summary 회원가입 API
-   */
   @Post("signup")
-  @TsoaResponse<ApiResponse<UserSignUpResponse>>(200, "회원가입 성공")
-  @TsoaResponse<ApiResponse<null>>(409, "중복된 이메일 에러")
   public async handleUserSignUp(
     @Body() body: UserSignUpRequest,
   ): Promise<ApiResponse<UserSignUpResponse>> {
     const user = await signUpUser(body);
     return success(user);
+  }
+
+  @Patch("me")
+  @Middlewares(requireJwt)
+  public async handleUpdateMyInfo(
+    @Body() body: UpdateUserRequest,
+    @Request() req: ExpressRequest,
+  ): Promise<ApiResponse<UpdateUserResponse>> {
+    const memberId = Number((req.user as any).memberId);
+    return success(await updateMyInfo(memberId, body));
   }
 
   @Get("guest")
@@ -39,7 +47,7 @@ export class UserController extends Controller {
   }
 
   @Get("mypage")
-  @Middlewares(authorizeUser())
+  @Middlewares(authorizeUser)
   public async handleMypage(@Request() req: ExpressRequest): Promise<String> {
     return `
             <h1>마이페이지</h1>

@@ -7,7 +7,7 @@ export const restaurantMissionAdd = async (data: MissionRestaurantCreateRequest,
     try {
         const restaurant = await getRestaurantById(restaurantId);
         if (!restaurant) {
-            throw new RestaurantNotFoundError("존재하지 않는 식당입니다.", { restaurantId });
+            throw new RestaurantNotFoundError("존재하지 않는 식당입니다.");
         }
 
         const joinMissionId = await addMission({
@@ -45,7 +45,7 @@ export const getRestaurantMissions = async (restaurantId: number): Promise<Resta
     try {
         const restaurant = await getRestaurantById(restaurantId);
         if (!restaurant) {
-            throw new RestaurantNotFoundError("존재하지 않는 식당입니다.", { restaurantId });
+            throw new RestaurantNotFoundError("존재하지 않는 식당입니다.");
         }
 
         const missions = await getMissionsByRestaurantId(restaurantId);
