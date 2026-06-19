@@ -1,5 +1,5 @@
 import { prisma } from "../../../db.config";
-import { Gender } from "../../../generated/prisma/enums";
+import { type Gender } from "../../../generated/prisma/enums";
 
 interface CreateMemberData {
   email: string;
@@ -23,14 +23,14 @@ interface MemberRow {
   phoneNum: string | null;
 }
 
-interface UserPreferenceRow {
+interface MemberPreferenceRow {
   userFavorCategoryId: number;
   memberId: bigint;
   foodCategoryId: number;
   foodCategory: { foodCategoryId: number; name: string } | null;
 }
 
-export const addUser = async (data: CreateMemberData): Promise<bigint | null> => {
+export const addUser = async (data: CreateMemberData): Promise<number | null> => {
   const member = await prisma.member.findFirst({ where: { email: data.email } });
   if (member) return null;
 
@@ -47,25 +47,37 @@ export const addUser = async (data: CreateMemberData): Promise<bigint | null> =>
     },
   });
 
-  return created.memberId;
+  return Number(created.memberId);
 };
 
-export const getUser = async (memberId: bigint): Promise<MemberRow> => {
+export const getUser = async (memberId: number): Promise<MemberRow> => {
   return await prisma.member.findFirstOrThrow({
-    where: { memberId },
+    where: { memberId: BigInt(memberId) },
     select: { memberId: true, email: true, name: true, gender: true, birth: true, address: true, detailAddress: true, phoneNum: true },
   }) as MemberRow;
 };
 
-export const setPreferences = async (memberId: bigint, foodCategoryIds: number[]): Promise<void> => {
+export const setPreferences = async (memberId: number, foodCategoryIds: number[]): Promise<void> => {
   await prisma.userFavorCategory.createMany({
-    data: foodCategoryIds.map((foodCategoryId) => ({ memberId, foodCategoryId })),
+    data: foodCategoryIds.map((foodCategoryId) => ({ memberId: BigInt(memberId), foodCategoryId })),
   });
 };
 
-export const getUserPreferencesByUserId = async (memberId: bigint): Promise<UserPreferenceRow[]> => {
+export const updateMember = async (memberId: number, data: {
+  name?: string;
+  nickname?: string;
+  birth?: Date;
+  phoneNum?: string;
+}): Promise<void> => {
+  await prisma.member.update({
+    where: { memberId: BigInt(memberId) },
+    data,
+  });
+};
+
+export const getUserPreferencesByUserId = async (memberId: number): Promise<MemberPreferenceRow[]> => {
   return await prisma.userFavorCategory.findMany({
-    where: { memberId },
+    where: { memberId: BigInt(memberId) },
     select: {
       userFavorCategoryId: true,
       memberId: true,
@@ -73,5 +85,5 @@ export const getUserPreferencesByUserId = async (memberId: bigint): Promise<User
       foodCategory: { select: { foodCategoryId: true, name: true } },
     },
     orderBy: { foodCategoryId: "asc" },
-  }) as UserPreferenceRow[];
+  }) as MemberPreferenceRow[];
 };

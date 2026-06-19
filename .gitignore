@@ -155,3 +155,5 @@ dist
 
 .vscode/
 BB/src/generated/prisma/
+ballie/src/generated/
+ballie/prisma/migrations/

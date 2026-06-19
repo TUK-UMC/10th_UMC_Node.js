@@ -1,9 +1,17 @@
-import { Body, Controller, Get, Path, Post, Route, Tags } from "tsoa";
+import { Body, Controller, Example, Get, Path, Post, Response, Route, Tags } from "tsoa";
 import { MissionRestaurantCreateRequest, MissionRestaurantCreateResponse, RestaurantMissionDTO } from "./mission.dto.js";
 import { restaurantMissionAdd, getRestaurantMissions } from "./mission.service.js";
 import { ApiResponse, success } from "../../common/response/response";
 import { AppError } from "../../common/error/app.error.js";
-import { Response as TsoaResponse } from "tsoa";
+import { InternalServerException } from "../../common/error/error.js";
+import {
+    ErrorResponse,
+    missionCreateRequestExample,
+    missionCreateResponseExample,
+    restaurantMissionsExample,
+    restaurantNotFoundError,
+    internalServerError,
+} from "./mission.swagger.js";
 
 @Route("missions")
 @Tags("missions")
@@ -11,13 +19,12 @@ export class MissionController extends Controller {
     /**
      * 식당 미션 추가
      * @summary 특정 식당에 미션을 추가합니다.
-     * @param restaurantId
-     * @param body
      */
     @Post("restaurant/{restaurantId}")
-    @TsoaResponse<ApiResponse<MissionRestaurantCreateResponse>>(201, "식당 미션 추가 성공")
-    @TsoaResponse<ApiResponse<null>>(404,"존재하지 않는 식당")
-    @TsoaResponse<ApiResponse<null>>(500,"알수없는오류")
+    @Example<MissionRestaurantCreateRequest>(missionCreateRequestExample)
+    @Response<ApiResponse<MissionRestaurantCreateResponse>>(201, "식당 미션 추가 성공", missionCreateResponseExample)
+    @Response<ErrorResponse>(404, "존재하지 않는 식당", restaurantNotFoundError)
+    @Response<ErrorResponse>(500, "서버 내부 오류", internalServerError)
     public async handleMissionAdd(
         @Path() restaurantId: number,
         @Body() body: MissionRestaurantCreateRequest,
@@ -27,19 +34,18 @@ export class MissionController extends Controller {
             return success(mission);
         } catch (err) {
             if (err instanceof AppError) throw err;
-            throw new AppError({ errorCode: "INTERNAL", statusCode: 500, message: "알 수 없는 오류가 발생했습니다" });
+            throw new InternalServerException("알 수 없는 오류가 발생했습니다");
         }
     }
 
     /**
-     * 식당 미션 읽어오기 API
+     * 식당 미션 목록 조회
      * @summary 특정 식당의 미션 목록을 조회합니다.
-     * @param restaurantId
      */
     @Get("restaurant/{restaurantId}")
-    @TsoaResponse<ApiResponse<RestaurantMissionDTO[]>>(200,"식당 미션 목록 조회 성공")
-    @TsoaResponse<ApiResponse<null>>(404,"존재하지 않는 식당")
-    @TsoaResponse<ApiResponse<null>>(500,"알수없는오류")
+    @Example<ApiResponse<RestaurantMissionDTO[]>>(restaurantMissionsExample)
+    @Response<ErrorResponse>(404, "존재하지 않는 식당", restaurantNotFoundError)
+    @Response<ErrorResponse>(500, "서버 내부 오류", internalServerError)
     public async handleGetRestaurantMissions(
         @Path() restaurantId: number,
     ): Promise<ApiResponse<RestaurantMissionDTO[]>> {
@@ -48,7 +54,7 @@ export class MissionController extends Controller {
             return success(missions);
         } catch (err) {
             if (err instanceof AppError) throw err;
-            throw new AppError({ errorCode: "INTERNAL", statusCode: 500, message: "알 수 없는 오류가 발생했습니다" });
+            throw new InternalServerException("알 수 없는 오류가 발생했습니다");
         }
     }
 }

@@ -25,3 +25,14 @@ export interface UserSignUpResponse {
   /** 선택한 선호 카테고리 이름 목록 */
   preferences: string[];
 }
+
+export interface UpdateUserRequest {
+  name?: string;
+  nickname?: string;
+  birth?: string;
+  phoneNum?: string;
+}
+
+export interface UpdateUserResponse {
+  userId: number;
+}

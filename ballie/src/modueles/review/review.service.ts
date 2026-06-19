@@ -7,7 +7,7 @@ export const reviewAdd = async (userId: number, data: ReviewCreateRequest, resta
     try {
         const restaurant = await getRestaurantById(restaurantId);
         if (!restaurant) {
-            throw new RestaurantNotFoundError("존재하지 않는 식당입니다", data);
+            throw new RestaurantNotFoundError("존재하지 않는 식당입니다");
         }
 
         const reviewId = await addReview({
