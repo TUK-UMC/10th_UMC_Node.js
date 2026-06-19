@@ -1,5 +1,5 @@
-import { type UserSignUpRequest, type UserSignUpResponse } from "../dtos/user.dto";
-import { addUser, getUser, getUserPreferencesByUserId, setPreferences } from "../repositories/user.repository";
+import { type UserSignUpRequest, type UserSignUpResponse, type UpdateUserRequest, type UpdateUserResponse } from "../dtos/user.dto";
+import { addUser, getUser, getUserPreferencesByUserId, setPreferences, updateMember } from "../repositories/user.repository";
 import { DuplicateUserEmailError } from "../../../common/errors/error";
 import { Gender } from "../../../generated/prisma/enums";
 import bcrypt from "bcrypt";
@@ -39,4 +39,14 @@ export const signUpUser = async (data: UserSignUpRequest): Promise<UserSignUpRes
     userId: Number(member.memberId),
     preferences: preferences.map((p) => p.foodCategory?.name ?? ""),
   };
+};
+
+export const updateMyInfo = async (memberId: number, data: UpdateUserRequest): Promise<UpdateUserResponse> => {
+  await updateMember(memberId, {
+    name: data.name,
+    nickname: data.nickname,
+    birth: data.birth ? new Date(data.birth) : undefined,
+    phoneNum: data.phoneNum,
+  });
+  return { userId: memberId };
 };
