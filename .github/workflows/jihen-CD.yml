@@ -1,0 +1,123 @@
+name: jihen-CD
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "jihen/**"
+      - ".github/workflows/jihen-CD.yml"
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ./jihen/package-lock.json
+      - name: Install dependencies
+        working-directory: ./jihen
+        run: npm ci
+      - name: Inject environment variables
+        working-directory: ./jihen
+        run: |
+          cat > .env <<'EOF'
+          ${{ secrets.JIHEN_EC2_DOT_ENV }}
+          EOF
+      - name: Generate + Build
+        working-directory: ./jihen
+        run: npm run build
+      - name: Prune devDependencies (runtime) + Regenerate
+        working-directory: ./jihen
+        run: |
+          npm prune --omit=dev
+          npx -p prisma prisma generate
+      - name: Pack artifact
+        working-directory: ./jihen
+        run: |
+          mkdir -p artifact
+          cp -r dist artifact/dist
+          cp -r node_modules artifact/node_modules
+          cp package.json package-lock.json prisma.config.ts artifact/
+          if [ -d prisma ]; then cp -r prisma artifact/prisma; fi
+          tar -czf artifact.tgz -C artifact .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jihen-app-artifact
+          path: jihen/artifact.tgz
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jihen-app-artifact
+          path: .
+      - name: Extract artifact
+        run: |
+          mkdir -p artifact
+          tar -xzf artifact.tgz -C artifact
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$JIHEN_EC2_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          cat >> ~/.ssh/config <<END
+          Host target
+              HostName $JIHEN_EC2_HOST
+              Port $JIHEN_EC2_PORT
+              User $JIHEN_EC2_USER
+              IdentityFile ~/.ssh/id_rsa
+              StrictHostKeyChecking no
+          END
+        env:
+          JIHEN_EC2_SSH_KEY: ${{ secrets.JIHEN_EC2_SSH_KEY }}
+          JIHEN_EC2_HOST: ${{ secrets.JIHEN_EC2_HOST }}
+          JIHEN_EC2_PORT: ${{ secrets.JIHEN_EC2_PORT }}
+          JIHEN_EC2_USER: ${{ secrets.JIHEN_EC2_USER }}
+      - name: Copy artifact to Server
+        run: |
+          ssh target 'sudo mkdir -p /opt/app/jihen/incoming && sudo chown -R ubuntu:ubuntu /opt/app/jihen'
+          cd artifact
+          rsync -az --delete --ignore-missing-args \
+              --exclude ".git" \
+              --exclude ".env" \
+              ./dist ./prisma ./node_modules ./package.json ./package-lock.json prisma.config.ts \
+              target:/opt/app/jihen/incoming/
+      - name: Switch Environment
+        run: |
+          ssh target '
+              set -e
+              cd /opt/app/jihen
+              rm -rf current
+              mv incoming current
+              '
+      - name: Create environment variables
+        run: |
+          ssh target "cat > /opt/app/jihen/current/.env <<'EOF'
+          ${{ secrets.JIHEN_EC2_DOT_ENV }}
+          EOF"
+        env:
+          JIHEN_EC2_DOT_ENV: ${{ secrets.JIHEN_EC2_DOT_ENV }}
+      - name: Start / Reload app with PM2
+        run: |
+          ssh target '
+              set -e
+              source ~/.nvm/nvm.sh
+              cd /opt/app/jihen/current
+              export NODE_ENV=production
+              # 이미 실행 중이면 재시작, 처음이면 새로 시작
+              pm2 restart jihen --update-env || pm2 start npm --name jihen -- start
+              # 현재 프로세스 목록 저장 (재부팅 후 자동 복원용)
+              pm2 save
+              '
+      - name: Check service status
+        run: |
+          ssh target 'source ~/.nvm/nvm.sh && pm2 list && pm2 logs jihen --lines 20 --nostream'

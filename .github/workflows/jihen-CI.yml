@@ -1,0 +1,35 @@
+name: jihen-CI
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    paths:
+      - "jihen/**"
+      - ".github/workflows/jihen-CI.yml"
+      - ".github/workflows/jihen-CD.yml"
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: ./jihen/package-lock.json
+      - name: Install dependencies
+        working-directory: ./jihen
+        run: npm ci
+      - name: Inject environment variables
+        working-directory: ./jihen
+        run: |
+          cat > .env <<'EOF'
+          ${{ secrets.JIHEN_EC2_DOT_ENV }}
+          EOF
+      - name: Generate + Build
+        working-directory: ./jihen
+        run: npm run build
