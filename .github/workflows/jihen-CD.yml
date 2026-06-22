@@ -2,7 +2,7 @@ name: jihen-CD
 on:
   push:
     branches:
-      - main
+      - develop
     paths:
       - "jihen/**"
       - ".github/workflows/jihen-CD.yml"
